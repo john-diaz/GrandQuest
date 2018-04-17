@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Map Navigation</title>
+    <style>
+        #wrapper {
+            width:300px; height: 300px; overflow:hidden;position:relative;
+        }
+    #map-frame{
+        background-image: url('https://i.redd.it/xlolj0bg057z.jpg');
+        background-size: 100%;
+        width: 100vw;
+        height: 100vh;
+        transition: .2s all ease-in-out;
+    }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="map-frame">
+
+        </div>
+    </div>
+    <button onClick="gohere()">Go!</button>
+</body>
+<script>
+    function gohere(){
+        var frame = document.getElementById("map-frame");
+        
+        frame.style.transform = "translate(-370px,-170px)"
+    }
+</script>
+</html>
