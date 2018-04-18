@@ -31,4 +31,6 @@ The data structure for the world should ideally branch from the world, to countr
 #### Navigating the map
 The map is held inside a wrapper with a fixed size.
 The actual map position will be manipulated with css.
-[example]('./example.html')
+[example]('https://github.com/JohnCdf/GrandQuest/blob/master/example.html')
+To go to a location, the user will need to click on the position of the location.
+The current location search function will check if there is a spot in the range of the coordinates in the mouse click (see example).

@@ -6,31 +6,83 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Map Navigation</title>
     <style>
+        body{
+            text-align: center;
+            padding: 0;
+            margin:0;
+        }
         #wrapper {
-            width:300px; height: 300px; overflow:hidden;position:relative;
+            width:100%;
+            height: 100vh;
+            overflow:hidden;
+            background-image:url("https://wallpapercave.com/wp/XqRBXyO.jpg")
         }
     #map-frame{
         background-image: url('https://i.redd.it/xlolj0bg057z.jpg');
-        background-size: 100%;
-        width: 100vw;
-        height: 100vh;
+        background-repeat: no-repeat;
+        background-size: contain;
+        width:150%;
+        height: 150%;
         transition: .2s all ease-in-out;
     }
     </style>
 </head>
 <body>
-    <div id="wrapper">
-        <div id="map-frame">
+    <h1 id="display">Navigation Prototype</h1>
+    <hr>
+    <div id="wrapper" >
+        <div id="map-frame" onclick="goTo(event)">
 
         </div>
     </div>
-    <button onClick="gohere()">Go!</button>
 </body>
 <script>
-    function gohere(){
+    var user = {//this will be a centralized state in React using Redux
+        gold: 20
+    }
+    var goTo= function(e){
         var frame = document.getElementById("map-frame");
-        
-        frame.style.transform = "translate(-370px,-170px)"
+        var x = e.offsetX; 
+        var y = e.offsetY; 
+    
+
+        for(i = 0; i < spots.length; i++){
+            var currentSpot = spots[i];
+            if (    (x > currentSpot.coords[0][0] &&  y > currentSpot.coords[0][1]) && (x < currentSpot.coords[1][0] &&  y < currentSpot.coords[1][1])    ){
+                console.log("Welcome to the " + currentSpot.name);
+                currentSpot.action()
+            }
+
+        }
+        console.log(Number(x) + " , " + String(y))
+        frame.style.transform = "translate(-"+x/4+"px,-"+y/4+"px)"
+    }
+
+    var spots = [
+        {
+            coords: [[30,28],[135,87]],
+            name: "Farm",
+            action: function(){
+                display("You enter the farm and are sold some hay")
+            }
+        },
+        {
+            coords: [[329, 461],[684,641]],
+            name: "Fish Market",
+            action: function(){
+                if(user.gold > 10){
+                    display("You buy some fish and lose 10 gold")
+                    user.gold-=10;
+                }
+                else {
+                    display("You have no gold to buy fish!")
+                }
+            }
+        }
+    ];
+
+    function display(T){
+        document.getElementById("display").innerHTML=T
     }
 </script>
 </html>
