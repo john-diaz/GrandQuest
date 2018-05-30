@@ -7,8 +7,8 @@ Right now the upstream prerequisites are being worked.
 ## Technologies to be used
  React.js,
  Node.js/ MongoDB,
- GreenSock,
- frameworks*
+ GreenSock ?,
+ Express or Sails,*
 
 ## Architecture
 ### Design
