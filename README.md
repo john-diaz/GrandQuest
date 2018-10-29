@@ -10,9 +10,9 @@ Spin off of Epiquest
 - Shops
 - Trading
 - Open world
+- Crafting / smelting
 
 Currently testing [here](https://github.com/client-server)
-
 
 ## Assets I think look cool
 
@@ -30,3 +30,6 @@ https://opengameart.org/content/golden-items-rip-upgrade-pack
 https://opengameart.org/content/various-inventory-24-pixel-icon-set
 https://opengameart.org/content/weird-fruits-16x16
 https://opengameart.org/content/roguelikerpg-items
+
+## Biggest challenges in testing
+ - client-server lockstepping and interpolation
