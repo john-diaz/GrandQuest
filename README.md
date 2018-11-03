@@ -33,3 +33,17 @@ https://opengameart.org/content/roguelikerpg-items
 
 ## Biggest challenges in testing
  - client-server lockstepping and interpolation
+
+## Game setting / story
+ - timeframe: we do not know. could be before great breakthroughs in technology, or a post-apocaliptic era
+ - location: alternate land, vast and unexplored. riddled with all types of terrains, characters, enemies and scenes
+  - forests
+  - deserts
+  - oceans
+  - tropics
+  - villages
+  - valleys
+  - towns
+  - cities (such as the one in epiquest64)
+  - dungeons
+  
