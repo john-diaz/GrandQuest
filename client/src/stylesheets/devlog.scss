@@ -1,0 +1,14 @@
+.devlog {
+  .main-thumbnail {
+    min-height: 50vh;
+    width: 100%;
+    background-image: url('../public/img/devlog.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .content {
+    background-image: white;
+    padding: 1em;
+  }
+}

@@ -1,6 +1,6 @@
-$mainBlue: #0075b6;
+$mainBlue: #036ca5;
 $mainBlack: rgb(24, 24, 24);
-$mainGrey: #ccc;
+$mainGrey: rgb(179, 179, 179);
 
 body {
   padding: 0;
@@ -16,7 +16,6 @@ body {
 
 .main-header {
   background: transparent;
-  border: 1px solid rgb(207, 207, 207);
   z-index: 100;
   
   #title { 
@@ -77,44 +76,4 @@ body {
   //   width: 100%;
   //   background: linear-gradient(to bottom, #005485, #66a3c7, transparent)
   // }
-}
-
-.landing {
-  #combat-img {
-    z-index: -1;
-    background-image: url('../../public/img/combat.png');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 42rem;
-    width: 100%;
-    
-    position: absolute;
-  }
-
-  .container {
-    background: white;
-    z-index: 30;
-    margin-top: 75vh;
-    min-height: 90vh;
-
-    aside {
-      float: left;
-      width: 30%;
-
-      padding: 1em;
-      color: $mainGrey;
-      font-weight: lighter;
-      line-height: 2rem;
-    }
-    .content {
-      width: 65%;
-      height: 100%;
-      float: right;
-
-      text-align: right;
-      padding: 1em;
-    }
-  }
 }
