@@ -81,6 +81,7 @@ const generateTemplate = (title, fileName) => {
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
         
+        ${ htmlTitle ? `<script src="../dist/js/${htmlTitle.toLowerCase()}.js"></script>` : '' }
         ${ htmlTitle ? `<link rel="stylesheet" href="../dist/css/${htmlTitle.toLowerCase()}.css">` : '' }
         <link rel="stylesheet" href="../dist/css/styles.css">
         <title>${ htmlTitle ? `GrandQuest - ${htmlTitle}` : 'GrandQuest - RPG / Multiplayer' }</title>
