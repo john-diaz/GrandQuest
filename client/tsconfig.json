@@ -1,0 +1,9 @@
+{
+  "files": [
+    "./src/scripts/devlog.ts"
+  ],
+  "compilerOptions": {
+      "noImplicitAny": true,
+      "target": "es6"
+  }
+}

@@ -9,6 +9,15 @@ var sass = require('gulp-sass');
  
 sass.compiler = require('node-sass');
 
+var ts = require("gulp-typescript");
+var tsProject = ts.createProject("tsconfig.json");
+
+gulp.task("typescript", function () {
+    return tsProject.src()
+      .pipe(tsProject())
+      .js.pipe(gulp.dest('./dist/js'));
+});
+
 gulp.task('sass', function () {
     var plugins = [
       autoprefixer({browsers: ['last 1 version']}),
@@ -22,5 +31,6 @@ gulp.task('sass', function () {
 });
 
 gulp.task('default', function() {
+  gulp.watch('./src/scripts/*.ts', ['typescript']);
   gulp.watch('./src/stylesheets/*.scss', ['sass']);
 });
