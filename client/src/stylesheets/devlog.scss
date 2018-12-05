@@ -1,14 +1,31 @@
+$mainBlue: #036ca5;
+$mainBlack: rgb(24, 24, 24);
+$mainGrey: rgb(179, 179, 179);
+
 .devlog {
-  .main-thumbnail {
-    min-height: 50vh;
-    width: 100%;
-    background-image: url('../public/img/devlog.png');
+  min-height: 100vh;
+
+  .main-thumb {
+    min-height: 10rem;
+    background-image: url('../../public/img/devlog.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    background-attachment: fixed;
   }
-  .content {
+  .main {
     background-image: white;
     padding: 1em;
+    .content {
+      float: left;
+    }
+    aside {
+      float: right;
+      max-width: 400px;
+
+      hr {
+        border: 2px solid $mainBlack;
+      }
+    } 
   }
 }
