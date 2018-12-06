@@ -11,7 +11,11 @@ redisClient.flushdb((err, res) => {
   } else {
     console.log('$ REDIS: flushed cache');
   }
-})
+});
+
+const pool = require('./lib/db/client');
+
+const s3Client = require('./lib/s3-client');
 
 const app = express();
 
@@ -36,6 +40,40 @@ app.get('/about', (req, res) => {
 app.get('/devlog', (req, res) => {
   getTemplate({ title: 'DevLog' }, ({ status, html }) => {
     res.status(status).send(html);
+  });
+});
+
+app.get('/devlog/:id', (req, res) => {
+  redisClient.get(`DEVLOG#${req.params.id}`, (err, val) => {
+    if (val && !err) {
+      console.log('$ REDIS : found cached DEV_LOG#', req.params.id);
+
+      let obj = JSON.parse(val);
+      return res.send(obj.html);
+    }
+
+    pool.query(`SELECT * FROM dev_log WHERE ID = ${req.params.id}`, (err, results) => {
+      if (err || results.rowCount < 1)
+        return res.status(404).send('404! could not find that devlog...');
+      
+      var devLog = results.rows[0];
+
+      s3Client.getObject({
+        Bucket: 'grandquest-devlog',
+        Key: devLog.log_url,
+      }, (err, data) => {
+        if (err)
+          return res.sendStatus(500);
+
+        let title = devLog.title;
+        let html = data.Body.toString('utf-8');
+
+        res.send(html);
+
+        console.log('$ REDIS : cached DEVLOG#' + req.params.id);
+        redisClient.set(`DEVLOG#${req.params.id}`, JSON.stringify({ title, html }), 'EX', 60 * 60 * 3);
+      });
+    });
   });
 });
 
