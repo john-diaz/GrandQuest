@@ -18,12 +18,6 @@ describe('DevLog', () => {
   });
 
   describe('GET /devlog', () => {
-    it('should not be cached', (done) => {
-      redisClient.get('DEVLOG', (err, val) => {
-        expect(val).to.be.null
-        done()
-      });
-    });
     it('should receive an HTML file', (done) => {
       chai.request(server)
         .get('/devlog')
@@ -34,15 +28,32 @@ describe('DevLog', () => {
           done();
         });
     });
-    it('should cache the HTML file', (done) => {
-      redisClient.get('DEVLOG', (err, val) => {
-        expect(val).to.be.string
+  });
 
+  describe('GET /api/devlog', () => {
+    it('should not be cached', (done) => {
+      redisClient.get(`DB:DEV_LOG`, (err, val) => {
+        expect(val).to.be.null
+        done()
+      });
+    });
+    it('should receive the chosen devlog HTML', (done) => {
+      chai.request(server)
+        .get(`/api/devlog`)
+        .end((err, res) => {
+          let body = res.body
+
+          expect(body.data).to.be.an('Array');
+          done()
+        });
+    });
+    it('should cache the devlogs', (done) => {
+      redisClient.get(`DB:DEV_LOG`, (err, val) => {
+        expect(val).to.be.string
         done()
       });
     });
   });
-
   describe('GET /api/devlog/:id', () => {
     var devLog;
     var expectedHTML;
@@ -63,7 +74,7 @@ describe('DevLog', () => {
     });
 
     it('should not be cached', (done) => {
-      redisClient.get(`DEVLOG#${devLog.id}`, (err, val) => {
+      redisClient.get(`DB:DEV_LOG#${devLog.id}`, (err, val) => {
         expect(val).to.be.null
         done()
       });
@@ -77,7 +88,7 @@ describe('DevLog', () => {
         });
     });
     it('should cache the devlog', (done) => {
-      redisClient.get(`DEVLOG#${devLog.id}`, (err, val) => {
+      redisClient.get(`DB:DEV_LOG#${devLog.id}`, (err, val) => {
         expect(val).to.be.string
         done()
       });
