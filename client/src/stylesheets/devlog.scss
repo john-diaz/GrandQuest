@@ -28,4 +28,18 @@ $mainGrey: rgb(179, 179, 179);
       }
     } 
   }
+
+  #devlog-container {
+    .devlog-item {
+      border-bottom: 1px solid $mainGrey;
+      padding: .5em 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .devlog-item:hover {
+      .title {
+        color: $mainBlue;
+      }
+    }
+  }
 }
