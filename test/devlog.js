@@ -59,7 +59,10 @@ describe('DevLog', () => {
     var expectedHTML;
 
     before((done) => {
-      pool.query('SELECT * FROM dev_log WHERE ID = 1', async (err, results) => {
+      const query = 'INSERT INTO dev_log (title, log_url) VALUES($1, $2) RETURNING *'
+      const values = ["example log", "week1.html"]
+
+      pool.query(query, values, async (err, results) => {
         if (err) throw err
         devLog = results.rows[0];
   
@@ -74,7 +77,7 @@ describe('DevLog', () => {
     });
 
     it('should not be cached', (done) => {
-      redisClient.get(`DB:DEV_LOG#${devLog.id}`, (err, val) => {
+      redisClient.get(`DB:DEV_LOG:${devLog.id}`, (err, val) => {
         expect(val).to.be.null
         done()
       });
@@ -88,7 +91,7 @@ describe('DevLog', () => {
         });
     });
     it('should cache the devlog', (done) => {
-      redisClient.get(`DB:DEV_LOG#${devLog.id}`, (err, val) => {
+      redisClient.get(`DB:DEV_LOG:${devLog.id}`, (err, val) => {
         expect(val).to.be.string
         done()
       });
