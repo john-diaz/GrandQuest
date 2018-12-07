@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
@@ -16,8 +14,6 @@ if (process.env.NODE_ENV == 'development') {
   }));
 }
 
-
-
 app.use(express.static('./client'));
 
 require('./lib/routes/devlog')(app);
@@ -25,23 +21,11 @@ require('./lib/routes/devlog')(app);
 // VIEWS
 
 app.get('/', (req, res) => {
-  console.log('$ SERVER: get /');
-
-  getTemplate({ title: 'Home', htmlFileName: 'index.html' },  ({status, html}) => {
-    console.log('$ SERVER: getTemplate => ', { status });
-
-    res.status(status).send(html);
-  });
-});
-
-app.get('/about', (req, res) => {
-  getTemplate({ title: 'About' }, ({ status, html}) => {
-    res.status(status).send(html);
-  });
+  res.json({ message: 'Hello, world!' });
 });
 
 app.get('*', (req, res) => {
-  res.status(404).send('404!');
+  res.status(404).send({ message: 'This route does not exist' });
 });
 
 const PORT = process.env.PORT || 5000
