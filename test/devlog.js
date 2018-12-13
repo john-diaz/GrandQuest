@@ -13,13 +13,9 @@ let expect = chai.expect
 chai.use(chaiHttp);
 
 describe('DevLog', () => {
-  beforeEach((done) => {
-    done();
-  });
-
   describe('GET /devlog', () => {
     it('should not be cached', (done) => {
-      redisClient.get(`DB:DEV_LOG`, (err, val) => {
+      redisClient.get('DB:DEV_LOG', (err, val) => {
         expect(val).to.be.null
         done()
       });
@@ -37,8 +33,9 @@ describe('DevLog', () => {
         });
     });
     it('should cache the devlogs', (done) => {
-      redisClient.get(`DB:DEV_LOG`, (err, val) => {
-        expect(val).not.to.be.null
+      redisClient.get('DB:DEV_LOG', (err, val) => {
+        expect(val).not.to.be.null;
+
         done()
       });
     });
