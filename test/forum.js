@@ -47,4 +47,54 @@ describe('Forum', () => {
       });
     });
   });
+  describe('GET /forum/:title', () => {
+    let cacheKey;
+    let forum;
+    let boards;
+
+    before(done => {
+      pool.query('SELECT * FROM forum WHERE array_length(boards, 1) > 0', (err, results) => {
+        if (err || !results.rowCount) {
+          throw err || new Error('Could not find forums to test (must have alteast one board)');
+        }
+
+        forum = results.rows[0];
+        pool.query('SELECT * FROM board WHERE forum_title = $1', [forum.title], (err, results) => {
+          if (err || !results.rowCount) {
+            throw err || new Error('Could not find boards to test');
+          }
+          boards = results.rows;
+
+          cacheKey = `DB:FORUMS:${forum.title.toLowerCase()}`;
+
+          done();
+        });
+      });
+    });
+
+    it('Should not have cached the forum', done => {
+      redisClient.get(cacheKey, (err ,val) => {
+        expect(val).to.be.null;
+        done();
+      });
+    });
+    it('Should return the forum', done => {
+      chai.request(server)
+          .get(`/forum/${forum.title}`)
+          .end((err, res) => {
+            let forumData = res.body.data;
+
+            expect(forumData.title).to.equal(forum.title);
+            console.log('boards ', boards);
+            expect(forumData.boards).to.deep.equal(boards);
+            done();
+          });
+    });
+    it('Should have cached the forum', done => {
+      redisClient.get(cacheKey, (err ,val) => {
+        expect(val).not.to.be.null;
+        done();
+      });
+    });
+  });
 });
