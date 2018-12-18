@@ -17,6 +17,10 @@ if (process.env.NODE_ENV == 'development') {
 // parse json body
 app.use(express.static('./client'));
 
+// authentication
+const authentication = require('./lib/authentication');
+app.use(authentication());
+
 // config routes
 const devLogRoutes = require('./lib/routes/devlog');
 const forumRoutes = require('./lib/routes/forum');
@@ -24,6 +28,7 @@ app.use(devLogRoutes);
 app.use(forumRoutes);
 
 app.get('/', (req, res) => {
+  console.log('req.user = ', req.user);
   res.json({ message: 'Hello, world!' });
 });
 
