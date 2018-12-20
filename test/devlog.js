@@ -5,11 +5,11 @@ const s3 = require('../lib/s3-client');
 const pool = require('../lib/db/client');
 const redisClient = require('../lib/redisClient');
 
+/* chai set up */
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let should = chai.should();
 let expect = chai.expect
-
 chai.use(chaiHttp);
 
 describe('DevLog', () => {
