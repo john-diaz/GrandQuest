@@ -18,7 +18,10 @@ if (!BCRYPT_SALT || BCRYPT_SALT == '') throw new Error('Invalid BCRYPT salt in e
 if (!JWT_KEY || JWT_KEY == '') throw new Error('Invalid JWT_KEY in env');
 
 const helpers = require('./lib/helpers');
-helpers.cache.flush();
+
+if (process.env.NODE_ENV === 'test') {
+  helpers.cache.flush();
+}
 
 const cors = require('cors');
 // enable CORS
