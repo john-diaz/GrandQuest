@@ -36,7 +36,6 @@ app.use(express.json());
 
 // authentication
 const authentication = require('./lib/authentication');
-app.use(authentication());
 
 // config routes
 const devLogRoutes = require('./lib/routes/devlog');
