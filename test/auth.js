@@ -59,7 +59,7 @@ describe('Authentication', () => {
               password,
             })
             .end((err, res) => {
-              expect(res.status).to.equal(201);
+              expect(res.status).to.equal(200);
               expect(res).to.have.header('authorization');
               done();
             });
@@ -129,7 +129,12 @@ describe('Authentication', () => {
               expect(res.status).to.equal(200);
               const user = res.body.payload;
 
-              expect(user).to.deep.equal({ email, username: 'skepdimi', gender: 'male' });
+              expect(user).to.haveOwnProperty('created_at');
+              expect(user).to.haveOwnProperty('email');
+              expect(user).to.haveOwnProperty('gender');
+              expect(user).to.haveOwnProperty('is_admin');
+              expect(user).to.haveOwnProperty('username');
+              expect(user).not.to.haveOwnProperty('hashed_password');
               done();
             });
         });
