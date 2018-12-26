@@ -29,29 +29,8 @@ describe('Authentication', () => {
     });
 
     describe('POST /auth', () => {
-      describe('When using incorrect credentials', () => {
-        it('should not return access token', done => {
-          chai.request(server)
-            .post('/auth')
-            .send({
-              email,
-              password: 'nope lol!',
-            })
-            .end((err, res) => {
-              expect(res.status).to.equal(401);
-              expect(res).not.to.have.header('authorization');
-              done();
-            });
-        });
-      });
       describe('When using correct credentials', () => {
-        it('should not have accessToken in redis', done => {
-          redisClient.get(`accessToken/${email}`, (err, jwt) => {
-            expect(jwt).to.be.null;
-            done();
-          });
-        });
-        it('should return an access token', done => {
+        it('should return an access token and user obj', done => {
           chai.request(server)
             .post('/auth')
             .send({
@@ -61,36 +40,24 @@ describe('Authentication', () => {
             .end((err, res) => {
               expect(res.status).to.equal(200);
               expect(res).to.have.header('authorization');
-              done();
-            });
-        });
-        it('should have accessToken in redis', done => {
-          redisClient.get(`accessToken/${email}`, (err, jwt) => {
-            expect(jwt).to.be.a('string');
-            done();
-          });
-        });
-        it('should not create new accessToken on further request', done => {
-          chai.request(server)
-            .post('/auth')
-            .send({
-              email,
-              password,
-            })
-            .end((err, res) => {
-              expect(res.status).to.equal(200);
+              const user = res.body.payload;
+              expect(user).to.be.an('object');
+              expect(user).not.to.haveOwnProperty('hashed_password');
+              expect(user).not.to.haveOwnProperty('token');
+
               done();
             });
         });
       });
     });
     describe('GET /auth', () => {
-      describe('When invalid credentials', () => {
+      describe('When bad credentials', () => {
         describe('When no credentials are provided', () => {
           it('should give us a 422 status code', done => {
             chai.request(server)
               .get('/auth')
               .end((err, res) => {
+                console.log(res);
                 expect(res.status).to.equal(422);
                 done();
               });
@@ -117,7 +84,8 @@ describe('Authentication', () => {
             .send({ email, password })
             .end((err, res) => {
               accessToken = res.headers['authorization'];
-
+              console.log('set ', accessToken);
+              
               done();
             });
         });
@@ -135,6 +103,7 @@ describe('Authentication', () => {
               expect(user).to.haveOwnProperty('is_admin');
               expect(user).to.haveOwnProperty('username');
               expect(user).not.to.haveOwnProperty('hashed_password');
+              expect(user).not.to.haveOwnProperty('token');
               done();
             });
         });
