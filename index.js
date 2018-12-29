@@ -1,7 +1,7 @@
-const server = require('http').createServer();
 
 const express = require('express');
-const app = express(server);
+const app = express();
+const server = require('http').Server(app);
 
 const { NODE_ENV } = process.env;
 
@@ -46,10 +46,10 @@ const authRoutes = require('./lib/routes/auth');
 app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
-
+console.log('-- game')
 // game socket
-const indexGameLocation = require('./lib/game/locations/');
-indexGameLocation.attach(server);
+// const indexGameLocation = require('./lib/game/locations/');
+// indexGameLocation.attach(server);
 
 app.get('/', (req, res) => {
   console.log('req.user = ', req.user);
