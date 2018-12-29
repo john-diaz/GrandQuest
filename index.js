@@ -1,5 +1,7 @@
+const server = require('http').createServer();
+
 const express = require('express');
-const app = express();
+const app = express(server);
 
 const { NODE_ENV } = process.env;
 
@@ -17,10 +19,10 @@ const { BCRYPT_SALT, JWT_KEY } = process.env;
 if (!BCRYPT_SALT || BCRYPT_SALT == '') throw new Error('Invalid BCRYPT salt in env');
 if (!JWT_KEY || JWT_KEY == '') throw new Error('Invalid JWT_KEY in env');
 
-const helpers = require('./lib/helpers');
+const redisClient = require('./lib/redisClient');
 
 if (process.env.NODE_ENV === 'test') {
-  helpers.cache.flush();
+  redisClient.flushdb();
 }
 
 const cors = require('cors');
@@ -35,7 +37,7 @@ if (process.env.NODE_ENV == 'development') {
 app.use(express.json());
 
 // authentication
-const authentication = require('./lib/authentication');
+const authentication = require('./lib/middleware/authentication');
 
 // config routes
 const devLogRoutes = require('./lib/routes/devlog');
@@ -44,6 +46,10 @@ const authRoutes = require('./lib/routes/auth');
 app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
+
+// game socket
+const indexGameLocation = require('./lib/game/locations/');
+indexGameLocation.attach(server);
 
 app.get('/', (req, res) => {
   console.log('req.user = ', req.user);
@@ -56,7 +62,7 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log('$ SERVER: listening at port ', PORT)
 });
 
