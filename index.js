@@ -1,7 +1,9 @@
 
 const express = require('express');
+const socketio = require('socket.io');
 const app = express();
 const server = require('http').Server(app);
+const io = socketio(server);
 
 const { NODE_ENV } = process.env;
 
@@ -46,10 +48,9 @@ const authRoutes = require('./lib/routes/auth');
 app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
-console.log('-- game')
+
 // game socket
-// const indexGameLocation = require('./lib/game/locations/');
-// indexGameLocation.attach(server);
+require('./lib/game/')(io.of('/game'));
 
 app.get('/', (req, res) => {
   console.log('req.user = ', req.user);
