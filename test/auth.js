@@ -57,7 +57,6 @@ describe('Authentication', () => {
             chai.request(server)
               .get('/auth')
               .end((err, res) => {
-                console.log(res);
                 expect(res.status).to.equal(422);
                 done();
               });
@@ -84,7 +83,6 @@ describe('Authentication', () => {
             .send({ email, password })
             .end((err, res) => {
               accessToken = res.headers['authorization'];
-              console.log('set ', accessToken);
               
               done();
             });
@@ -106,6 +104,43 @@ describe('Authentication', () => {
               expect(user).not.to.haveOwnProperty('token');
               done();
             });
+        });
+      });
+    });
+    describe('DELETE /auth/:token ', () => {
+      let accessToken;
+
+      before(done => {
+        chai.request(server)
+        .post('/auth')
+        .send({ email, password })
+        .end((err, res) => {
+          accessToken = res.headers['authorization'];
+          
+          done();
+        });
+      });
+      describe('when valid token', () => {
+        it('should eliminate token from db', done => {
+          chai.request(server)
+          .del(`/auth/${accessToken}`)
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            pool.query('SELECT * FROM users WHERE email = $1', [email], (err, results) => {
+              expect(results.rows[0].token).to.be.null;
+              done();
+            });
+          });
+        });
+      });
+      describe('when invalid token', () => {
+        it('should send back status code 404', done => {
+          chai.request(server)
+          .del('/auth/123')
+          .end((err, res) => {
+            expect(res.status).to.equal(404);
+            done();
+          });
         });
       });
     });
