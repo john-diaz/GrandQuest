@@ -1,9 +1,9 @@
 process.env.NODE_ENV = 'test';
 
-const server = require('../index.js');
-const s3 = require('../lib/s3-client');
-const pool = require('../lib/db/client');
-const redisClient = require('../lib/redisClient');
+const server = require('../../index.js');
+const s3 = require('../../lib/s3-client');
+const pool = require('../../lib/db/client');
+const redisClient = require('../../lib/redisClient');
 
 /* chai set up */
 let chai = require('chai');

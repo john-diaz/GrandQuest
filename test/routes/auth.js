@@ -7,11 +7,11 @@ chai.should();
 const expect = chai.expect;
 chai.use(chaihttp);
 
-const server = require('../index');
+const server = require('../../index');
 
-const pool = require('./tools/db');
+const pool = require('../tools/db');
 const bcrypt = require('bcrypt');
-const redisClient = require('../lib/redisClient');
+const redisClient = require('../../lib/redisClient');
 
 const { BCRYPT_SALT, } = process.env;
 
