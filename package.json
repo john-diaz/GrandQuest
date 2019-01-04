@@ -46,6 +46,7 @@
     "pgtools": "^0.3.0",
     "redis": "^2.8.0",
     "redux": "^4.0.1",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "underscore": "^1.9.1"
   }
 }
