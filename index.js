@@ -50,7 +50,7 @@ app.use(forumRoutes);
 app.use(authRoutes);
 
 // game socket
-require('./lib/game/')(io.of('/game'));
+require('./lib/game/')(io);
 
 app.get('/', (req, res) => {
   console.log('req.user = ', req.user);
