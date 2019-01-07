@@ -23,7 +23,7 @@ Back-end for GrandQuest
  
 ## Runs and hot-reloads for development
 ```
-    nodemon
+    npm run dev
 ```
 
 ## Running tests
