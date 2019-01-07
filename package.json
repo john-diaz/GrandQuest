@@ -4,7 +4,7 @@
   "description": "grandquest website",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"nodemon index.js\" \"cd client && gulp\"",
+    "dev": "nodemon --ignore 'lib/game/storage'",
     "test": "mocha --timeout=10000",
     "lint": "eslint ./lib/**.js"
   },
@@ -26,7 +26,6 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
-    "concurrently": "^4.1.0",
     "eslint": "^5.9.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.10.0",
@@ -40,12 +39,9 @@
     "dotenv": "^6.1.0",
     "engine.io": "^3.3.2",
     "express": "^4.16.4",
-    "gulp-coffee": "^3.0.3",
     "jsonwebtoken": "^8.4.0",
     "pg": "^7.7.1",
-    "pgtools": "^0.3.0",
     "redis": "^2.8.0",
-    "redux": "^4.0.1",
     "socket.io": "^2.2.0",
     "underscore": "^1.9.1"
   }
