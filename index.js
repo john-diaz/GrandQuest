@@ -9,10 +9,9 @@ const express = require('express'),
       cors = require('cors'),
       dotenv = require('dotenv');
 
-const redisClient = require('./lib/redisClient');
-
+      
 /*
-  Environmental variables
+Environmental variables
 */
 const { NODE_ENV, IP } = process.env;
 
@@ -23,8 +22,11 @@ if (NODE_ENV) {
 }
 
 /*
-  Import app routes
+  Relative imports
 */
+//  Redis
+const redisClient = require('./lib/redisClient');
+// App routes
 const devLogRoutes = require('./lib/routes/devlog');
 const forumRoutes = require('./lib/routes/forum');
 const authRoutes = require('./lib/routes/auth');
