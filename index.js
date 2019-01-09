@@ -13,7 +13,7 @@ const express = require('express'),
 /*
 Environmental variables
 */
-const { NODE_ENV, IP } = process.env;
+const { NODE_ENV } = process.env;
 
 if (NODE_ENV) {
   dotenv.config({ path: `.env.${NODE_ENV}` });
@@ -41,7 +41,7 @@ app.use(express.json());
 // enable CORS
 if (process.env.NODE_ENV == 'development') {
   app.use(cors({
-    origin: `http://${ IP ? IP : 'localhost' }:8080`,
+    origin: `http://localhost:8080`,
   }));
 }
 
@@ -79,15 +79,8 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-if (IP) {
-  server.listen(PORT, IP, () => {
-    console.log(`$ SERVER: listening at http://${IP}:${PORT}`);
-  });
-} else {
-  server.listen(PORT, () => {
-    console.log('$ SERVER: listening at port ', PORT);
-  });
-}
-
+server.listen(PORT, () => {
+  console.log('$ SERVER: listening at port ', PORT);
+});
 
 module.exports = app
