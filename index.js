@@ -39,11 +39,11 @@ const app = express();
 // parse json body
 app.use(express.json());
 // enable CORS
-if (process.env.NODE_ENV == 'development') {
-  app.use(cors({
-    origin: `http://localhost:8080`,
-  }));
-}
+let origin = process.env.CLIENT_ORIGIN || 'http://localhost:8080';
+console.log(`$ CORS client origin = '${origin}'`)
+app.use(cors({
+  origin,
+}));
 
 // config routes
 app.use(devLogRoutes);
