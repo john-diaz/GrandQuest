@@ -4,12 +4,10 @@
   Import dependencies
 */
 const express = require('express'),
-      socketio = require('socket.io'),
       http = require('http'),
       cors = require('cors'),
       dotenv = require('dotenv');
 
-      
 /*
 Environmental variables
 */
@@ -50,8 +48,8 @@ app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
 
-const server = http.Server(app);
-const io = socketio(server);
+const server = http.createServer(app);
+const io = require('socket.io').listen(server);
 
 /*
   Initialize the game with our socket server
