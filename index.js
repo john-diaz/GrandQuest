@@ -22,8 +22,7 @@ if (NODE_ENV) {
 /*
   Relative imports
 */
-//  Redis
-const redisClient = require('./lib/redisClient');
+// const redisClient = require('./lib/redisClient');
 // App routes
 const devLogRoutes = require('./lib/routes/devlog');
 const forumRoutes = require('./lib/routes/forum');
@@ -64,9 +63,9 @@ const { BCRYPT_SALT, JWT_KEY } = process.env;
 if (!BCRYPT_SALT || BCRYPT_SALT == '') throw new Error('Invalid BCRYPT salt in env');
 if (!JWT_KEY || JWT_KEY == '') throw new Error('Invalid JWT_KEY in env');
 
-if (process.env.NODE_ENV === 'test') {
-  redisClient.flushdb();
-}
+// if (process.env.NODE_ENV === 'test') {
+//   redisClient.flushdb();
+// }
 
 /*
   404 route
