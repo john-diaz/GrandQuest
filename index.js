@@ -27,6 +27,7 @@ if (NODE_ENV) {
 const devLogRoutes = require('./lib/routes/devlog');
 const forumRoutes = require('./lib/routes/forum');
 const authRoutes = require('./lib/routes/auth');
+const playerRoutes = require('./lib/routes/player');
 
 /*
   Configure app
@@ -46,6 +47,7 @@ app.use(cors({
 app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
+app.use(playerRoutes);
 
 const server = http.createServer(app);
 const io = require('socket.io').listen(server);
