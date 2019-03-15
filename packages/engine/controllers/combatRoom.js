@@ -177,12 +177,14 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: 1,
           defense: 1,
+          xp: 4,
+          gold: _.random(1, 3),
         }
       };
     }, {});
   }
   // 3-4 slimes
-  else if (level <= 3) {
+  else if (level <= 2) {
     return _.reduce([3, Math.floor(Math.random() * 4 + 3)], (m) => {
       const id = uuid();
       return {
@@ -196,12 +198,14 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: 1,
           defense: 1,
+          xp: 4,
+          gold: _.random(1, 2),
         }
       };
     }, {});
   }
   // 4 slimes with random power
-  else if (level <= 5) {
+  else if (level <= 4) {
     return _.reduce([1, 2], (m) => {
       const id = uuid();
       return {
@@ -213,9 +217,11 @@ const generateLevelEnemies = (level) => {
           username: 'Slime',
           entity: Entity.Slime(),
           selectionStatus: -1,
-          power: Math.floor(Math.random() * 3 + 1),
-          defense: Math.floor(Math.random() * 2 + 1),
-        }
+          power: _.random(1, 3),
+          defense: _.random(1, 3),
+          gold: _.random(3, 4),
+          xp: _.random(4, 6),
+        },
       };
     }, {});
   }
@@ -224,50 +230,58 @@ const generateLevelEnemies = (level) => {
     const e = [
       {
         id: uuid(),
-        level: Math.floor(Math.random() * 2 + 1),
+        level: _.random(1, 4),
         enemy: true,
         username: 'Slime',
         entity: Entity.Slime(),
         selectionStatus: -1,
-        power: Math.floor(Math.random() * 3 + 1),
-        defense: Math.floor(Math.random() * 2 + 1),
+        power: _.random(1, 3),
+        defense: _.random(1, 3),
+        gold: _.random(1, 2),
+        xp: _.random(4, 6),
       },
       {
         id: uuid(),
-        level: Math.floor(Math.random() * 2 + 1),
+        level: _.random(1, 2),
         enemy: true,
         username: 'Slime',
         entity: Entity.Slime(),
         selectionStatus: -1,
-        power: Math.floor(Math.random() * 3 + 1),
-        defense: Math.floor(Math.random() * 2 + 1),
+        power: _.random(1, 3),
+        defense: _.random(1, 3),
+        gold: _.random(1, 2),
+        xp: _.random(4, 5),
       },
       {
         id: uuid(),
-        level: Math.floor(Math.random() * 2 + 1),
+        level: _.random(1, 2),
         enemy: true,
         username: 'Slime',
         entity: Entity.Slime(),
         selectionStatus: -1,
-        power: Math.floor(Math.random() * 3 + 1),
-        defense: Math.floor(Math.random() * 2 + 1),
+        power: _.random(1, 3),
+        defense: _.random(1, 3),
+        gold: _.random(1, 2),
+        xp: 4,
       },
       {
         id: uuid(),
-        level: Math.floor(Math.random() * 2 + 1),
+        level: _.random(2, 3),
         enemy: true,
         username: 'Monokai Warrior',
         entity: Entity.MountainWarrior(),
         selectionStatus: -1,
-        power: Math.floor(Math.random() * 2 + 1),
-        defense: Math.floor(Math.random() * 4 + 1),
+        power: _.random(1, 2),
+        defense: _.random(1, 4),
+        gold: _.random(3, 5),
+        xp: _.random(5, 7),
       },
     ];
 
     return _.reduce(e, (m, c) => ({
       ...m,
       [c.id]: c
-    }), {})
+    }), {});
   }
   else if (level <= 7) {
     // slimes and mountain warrior
@@ -339,18 +353,12 @@ const saveLevelChanges = (roomState) => {
         };
       }
       if (action.type === 'attack') {
-        const { damage, dead, xp } = outcome;
+        const { damage, dead, xp, gold } = outcome;
         if (!character.enemy) {
           record.players[characterId].damageDealt += Math.round(damage);
           record.players[characterId].xp += xp;
           if (dead) {
-            const goldReward = receiver.entity.name == 'slime'
-            ? 4
-            : receiver.entity.name === 'mountain-warrior'
-            ? 10
-            : 0;
-
-            record.players[characterId].gold += goldReward;
+            record.players[characterId].gold += gold;
           }
         }
       }
@@ -435,8 +443,8 @@ const applyEvents = (roomState) => {
         const baseDamage = ((character.level / 12) + 1) * (character.power / receiver.defense) * chosenAttack.stats.baseDamage;
         // random number between 0 - 3
         let multiplier = Math.floor(Math.random() * 3) + 1;
-        // miss 15% of the time
-        if (Math.random() < .15) {
+        // miss 12% of the time
+        if (Math.random() < .12) {
           multiplier = 0;
         }
         // random number between 0.85 and 1
@@ -449,6 +457,7 @@ const applyEvents = (roomState) => {
           attackBase: chosenAttack.stats.baseDamage,
           damage,
           dead: false,
+          gold: 0,
           xp: 0,
         };
         character.entity.energy -= chosenAttack.stats.energy;
@@ -459,11 +468,14 @@ const applyEvents = (roomState) => {
           // if the character is a player
           if (!character.enemy) {
             let player = store.getState().players[character.id];
-            outcome.xp = receiver.entity.xp;
+            outcome.gold = 5 + receiver.gold + (3.5 * roomState.level);
+            outcome.xp = receiver.xp;
+
+            console.log(`GOLD = ${receiver.gold} + ${3.5 * roomState.level}`);
 
             let leveled = 0;
 
-            let newXp = player.xp + receiver.entity.xp;
+            let newXp = player.xp + receiver.xp;
             let newNextLevelXp = player.nextLevelXp;
 
             // level up time!
@@ -477,6 +489,7 @@ const applyEvents = (roomState) => {
               nexXp = ${newXp}
               newNextLevelXp = ${newNextLevelXp}
               leveled = ${leveled}
+              gold = ${outcome.gold}
             `)
 
             pool.query(`
