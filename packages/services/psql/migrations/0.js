@@ -19,7 +19,10 @@ CREATE TABLE users (
   xp INTEGER NOT NULL DEFAULT 0,
   next_level_xp INTEGER NOT NULL DEFAULT 200
 );
-
+CREATE TABLE user_inventory (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  item_id TEXT NOT NULL
+);
 CREATE TABLE forums (
   title CITEXT UNIQUE NOT NULL
 );
