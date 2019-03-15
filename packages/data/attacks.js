@@ -14,7 +14,7 @@ module.exports = {
     description: 'A brave swing ...',
     stats: {
       baseDamage: 20,
-      energy: 15,
+      energy: 16,
     },
   },
   'adventurer-back-swing': {
@@ -22,15 +22,15 @@ module.exports = {
     description: 'A bold move ...',
     stats: {
       baseDamage: 28,
-      energy: 20,
+      energy: 32,
     },
   },
   'adventurer-spin-swing': {
     name: 'Swing Spin',
     description: 'A powerful combination of a swing and spin swing',
     stats: {
-      baseDamage: 34,
-      energy: 25,
+      baseDamage: 39,
+      energy: 39,
     },
   },
   'slime-bite': {
