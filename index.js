@@ -3,9 +3,7 @@
 /*
   Import dependencies
 */
-const express = require('express'),
-      http = require('http'),
-      cors = require('cors'),
+const { createServer } = require('http'),
       dotenv = require('dotenv');
 
 /*
@@ -19,43 +17,15 @@ if (NODE_ENV) {
   dotenv.config();
 }
 
-/*
-  Relative imports
-*/
-// const redisClient = require('./lib/redisClient');
-// App routes
-const devLogRoutes = require('./lib/routes/devlog');
-const forumRoutes = require('./lib/routes/forum');
-const authRoutes = require('./lib/routes/auth');
-const playerRoutes = require('./lib/routes/player');
+// import express app and socket server
+const expressApp = require('./packages/express');
+const socketServer = require('./packages/socketServer');
 
-/*
-  Configure app
-*/
-const app = express();
+// create http server with express app
+const httpServer = createServer(expressApp);
 
-// parse json body
-app.use(express.json());
-// enable CORS
-let origin = process.env.CLIENT_ORIGIN || 'http://localhost:8080';
-console.log(`$ CORS client origin = '${origin}'`)
-app.use(cors({
-  origin,
-}));
-
-// config routes
-app.use(devLogRoutes);
-app.use(forumRoutes);
-app.use(authRoutes);
-app.use(playerRoutes);
-
-const server = http.createServer(app);
-const io = require('socket.io').listen(server);
-
-/*
-  Initialize the game with our socket server
-*/
-require('./lib/game/')(io);
+// socket server listen with the http server
+socketServer.listen(httpServer);
 
 console.log('$ SERVER - NODE_ENV =', process.env.NODE_ENV);
 console.log('$ SERVER - DB =', process.env.DB_NAME);
@@ -69,17 +39,10 @@ if (!JWT_KEY || JWT_KEY == '') throw new Error('Invalid JWT_KEY in env');
 //   redisClient.flushdb();
 // }
 
-/*
-  404 route
-*/
-app.get('*', (req, res) => {
-  res.status(404).send({ message: 'This route does not exist' });
-});
-
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log('$ SERVER: listening at port ', PORT);
 });
 
-module.exports = app
+module.exports = httpServer
