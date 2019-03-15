@@ -9,7 +9,6 @@ module.exports.Slime = () => ({
   energy: 5,
   maxEnergy: 10,
   energyRate: 5, // rate at which energy charges
-  xp: 15,
   attacks: {
     'slime-bite': attacks['slime-bite'],
   },
@@ -24,7 +23,6 @@ module.exports.MountainWarrior = () => ({
   maxHealth: 65,
   energy: 5,
   energyRate: 5,
-  xp: 30,
   attacks: {
     'mountain-warrior-slash': attacks['mountain-warrior-slash']
   },
@@ -38,7 +36,6 @@ module.exports.Adventurer = (combatant) => ({
   energy: 15,
   maxEnergy: 20,
   energyRate: 10, // rate at which energy charges
-  xp: null,
   attacks: {
     'adventurer-swing': attacks['adventurer-swing'],
     'adventurer-up-swing': attacks['adventurer-up-swing'],
