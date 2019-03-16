@@ -10,9 +10,12 @@ const availableShops = {
 			'heal-potion': 11,
 		},
 		actions: {
-			'heal': (player) => new Promise((resolve, error) => {
-				pool.query(`SELECT * FROM combatants WHERE id = ${player.id}`)
-				.then((results) => {
+			'heal': (player) => new Promise((resolve, reject) => {
+				pool.query(`SELECT * FROM combatants WHERE id = ${player.id}`, (err, results) => {
+					if (err) {
+						return reject('Failed to heal player. Please try again later!');
+					}
+
 					const combatant = results.rows[0];
 
 					const gold = player.gold;
@@ -20,7 +23,7 @@ const availableShops = {
 					const maxHealth = combatant.max_health;
 
 					if (health === maxHealth) {
-						return error('Great news, your health is already maxed out!');
+						return reject('Great news, your health is already maxed out!');
 					}
 					// how much HP you can buy with ONE gold
 					const goldToHealthUnit = 3;
@@ -31,7 +34,7 @@ const availableShops = {
 					let affordableHP = gold * goldToHealthUnit;
 
 					if (affordableHP < 1) {
-						error('Sorry, your gold is too low to afford healing.');
+						reject('Sorry, your gold is too low to afford healing.');
 					} else {
 						let added = Math.min(health + affordableHP, maxHealth) - health;
 						let cost = Number((added / goldToHealthUnit).toFixed(1));
@@ -62,9 +65,6 @@ const availableShops = {
 							});
 						});
 					}
-				})
-				.catch(() => {
-					error('Failed to heal player. Please try again later!');
 				});
 			}),
 		}
@@ -110,12 +110,35 @@ module.exports = (namespace) => (socket) => {
 				if (typeof cb === 'function') cb('Sorry, we dont sell that right now.');
 				return;
 			}
+
 			const itemPrice = chosenShop.items[item];
 
 			if (player.gold < itemPrice) {
 				if (typeof cb === 'function') cb('It looks like you don\'t have enough money for that item.');
 				return;
 			}
+
+			const newGold = Math.max(player.gold - itemPrice, 0);
+			pool.query(`
+				INSERT INTO user_inventory (
+					user_id,
+					item_id
+				) VALUES (
+					$1, $2
+				);
+			`, [player.id, item], err => {
+				if (err) throw err;
+			});
+			pool.query(`UPDATE users SET gold = ${newGold}`, (err) => {
+				if (err) throw err;
+			});
+			store.update('players', (players) => ({
+				...players,
+				[player.id]: {
+					...player,
+					gold: newGold,
+				}
+			}));
 
 			if (typeof cb === 'function') cb(null);
 		} else if (action) {
