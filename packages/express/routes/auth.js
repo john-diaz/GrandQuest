@@ -163,8 +163,21 @@ router.post('/auth/default', (req, res) => {
 
       pool.query(`
         WITH u AS (
-          INSERT INTO users (email, username, gender, hashed_password, token)
-          values($1, $2, $3, $4, $5)
+          INSERT INTO users (
+            email,
+            username,
+            gender,
+            hashed_password,
+            token,
+            gold
+          ) values(
+            $1,
+            $2,
+            $3,
+            $4, 
+            $5,
+            40
+          )
           RETURNING *
         )
         INSERT INTO combatants(id) SELECT id FROM u
