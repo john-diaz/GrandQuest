@@ -330,7 +330,7 @@ const applyLevelOutcomes = (id) => {
       record.won
         ? 'levels_won = levels_won + 1'
         : 'levels_lost = levels_lost + 1'
-    },
+    }
   FROM (${values}) AS c2(id)
   WHERE c2.id = c.id
   RETURNING *
