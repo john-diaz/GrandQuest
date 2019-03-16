@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "description": "grandquest website",
   "main": "index.js",
-  "scripts": {
-    "dev": "nodemon --ignore 'lib/game/storage'",
-    "test": "mocha --timeout=10000",
-    "lint": "eslint ./lib/**.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SKEPDIMI/GrandQuest.git"
