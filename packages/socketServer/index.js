@@ -80,16 +80,6 @@ namespace.on('connect', (socket) => {
       const player = store.getState().players[socket.userID];
 
       store.update('players', (players) => _.omit(players, player.id));
-
-      pool.query(`
-        UPDATE users
-        SET gold = ${player.gold},
-            xp = ${player.xp},
-            level = ${player.level}
-        WHERE id = ${socket.userID}
-      `, (err) => {
-        if (err) throw err;
-      });
     }
 
     console.log('disconnected ', socket.id);
