@@ -12,9 +12,6 @@ module.exports.Slime = () => ({
   attacks: {
     'slime-bite': attacks['slime-bite'],
   },
-  inventory: {
-    'heal-potion': { id: 'heal-potion', type: 'potion', amount: 2 },
-  },
 });
 
 module.exports.MountainWarrior = () => ({
@@ -26,7 +23,6 @@ module.exports.MountainWarrior = () => ({
   attacks: {
     'mountain-warrior-slash': attacks['mountain-warrior-slash']
   },
-  inventory: {},
 });
 
 module.exports.Adventurer = (combatant) => ({
@@ -41,8 +37,5 @@ module.exports.Adventurer = (combatant) => ({
     'adventurer-up-swing': attacks['adventurer-up-swing'],
     'adventurer-back-swing': attacks['adventurer-back-swing'],
     'adventurer-spin-swing': attacks['adventurer-spin-swing'],
-  },
-  inventory: {
-    'heal-potion': { name: 'Heal I', id: 'heal-potion', type: 'potion', amount: 2 },
   },
 });

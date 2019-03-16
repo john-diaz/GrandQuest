@@ -20,6 +20,7 @@ CREATE TABLE users (
   next_level_xp INTEGER NOT NULL DEFAULT 200
 );
 CREATE TABLE user_inventory (
+  uid SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id),
   item_id TEXT NOT NULL
 );

@@ -4,7 +4,9 @@
   Import dependencies
 */
 const store = require('../../../engine/store'),
-      pool = require('../../../services/psql/pool');
+      pool = require('../../../services/psql/pool'),
+      _ = require('underscore'),
+      items = require('../../../data/items');
 
 const Entity = require('../../../data/entities');
 
@@ -114,6 +116,7 @@ module.exports = () => (socket) => {
     } 
     else // Add the player
     {
+      // get the combatant
       pool.query(`
       SELECT * FROM combatants
       WHERE id = ${socket.userID}
@@ -127,46 +130,82 @@ module.exports = () => (socket) => {
             if (typeof cb === 'function') cb('You are too low on health to combat! Go to the potions shop and heal yourself.');
             return;
           }
-          const newRoom = {
-            ...room,
-            playerCount: room.playerCount + 1,
-            players: {
-              ...room.players,
-              [socket.userID]: {
-                id: socket.userID,
-                username: player.username,
-                enemy: false,
-                level: player.level,
-                power: combatant.power,
-                defense: combatant.defense,
-                entity: Entity.Adventurer(combatant), // set this to the role the player is doing
-                selectionStatus: room.turn % 2 == 0 ? 0 : -1,
+
+          // get the user_inventory
+          pool.query(`
+          SELECT item_id, uid FROM user_inventory
+          WHERE user_id = ${socket.userID}
+          `, (err, results) => {
+            if (err) {
+              if (typeof cb === 'function') cb('Failed to load player data. Please try again later.');
+              return;
+            }
+
+            const inventory = _.reduce(results.rows, (memo, row) => {
+              if (!memo[row.item_id]) {
+                const selectedItem = items[row.item_id];
+                memo[row.item_id] = {
+                  id: selectedItem.id,
+                  name: selectedItem.name,
+                  type: selectedItem.type,
+                  uids: [],
+                }
+              }
+
+              return {
+                ...memo,
+                [row.item_id]: {
+                  ...memo[row.item_id],
+                  uids: [...memo[row.item_id].uids, row.uid],
+                },
+              }
+            }, {});
+
+            const newRoom = {
+              ...room,
+              playerCount: room.playerCount + 1,
+              players: {
+                ...room.players,
+                [socket.userID]: {
+                  id: socket.userID,
+                  username: player.username,
+                  gold: player.gold,
+                  xp: player.xp,
+                  nextLevelXp: player.nextLevelXp,
+                  enemy: false,
+                  level: player.level,
+                  power: combatant.power,
+                  defense: combatant.defense,
+                  entity: Entity.Adventurer(combatant), // set this to the role the player is doing
+                  selectionStatus: room.turn % 2 == 0 ? 0 : -1,
+                  inventory,
+                },
               },
-            },
-          };
-
-          // update file
-          store.update('places', (places) => ({
-            ...places,
-            combat: {
-              ...places.combat,
-              inCombat: places.combat.inCombat + 1,
-              rooms: {
-                ...places.combat.rooms,
-                [newRoom.id]: newRoom,
+            };
+  
+            // update file
+            store.update('places', (places) => ({
+              ...places,
+              combat: {
+                ...places.combat,
+                inCombat: places.combat.inCombat + 1,
+                rooms: {
+                  ...places.combat.rooms,
+                  [newRoom.id]: newRoom,
+                },
               },
-            },
-          }));
-
-          socket.roomID = room.id;
-          socket.join(room.id);
-
-          // OK!
-          console.log(`! SOCKET connected to combat room. id(${room.id})`);
-          if (typeof cb === 'function') {
-            // callback no error and send combat room
-            cb(null, store.getState().places.combat.rooms[newRoom.id])
-          };
+            }));
+  
+            socket.roomID = room.id;
+            socket.join(room.id);
+  
+            // OK!
+            console.log(`! SOCKET connected to combat room. id(${room.id})`);
+            if (typeof cb === 'function') {
+              // callback no error and send combat room
+              cb(null, store.getState().places.combat.rooms[newRoom.id])
+            };
+          });
         }
       })
      }
@@ -268,11 +307,12 @@ module.exports = () => (socket) => {
         }
         break;
       case 'item':
-        let chosenItem = player.entity.inventory[action.id];
+        let chosenItem = player.inventory[action.id];
 
-        if (!chosenItem || !chosenItem.amount) {
+        if (!chosenItem || !chosenItem.uids.length) {
           return;
         }
+
         break;
       default:
         return;
@@ -285,7 +325,11 @@ module.exports = () => (socket) => {
       ...room,
       queuedEvents: [
         ...room.queuedEvents,
-        { characterId: socket.userID, ...event },
+        {
+          character: { id: socket.userID, enemy: false },
+          receiver: { id: receiver.id, enemy: receiver.enemy },
+          action: event.action,
+        },
       ],
       players: {
         ...room.players,
