@@ -16,8 +16,8 @@ module.exports.Slime = () => ({
 
 module.exports.MountainWarrior = () => ({
   name: 'mountain-warrior',
-  health: 65,
-  maxHealth: 65,
+  health: 70,
+  maxHealth: 70,
   energy: 5,
   energyRate: 5,
   attacks: {
@@ -29,9 +29,9 @@ module.exports.Adventurer = (combatant) => ({
   name: 'adventurer',
   health: combatant.health,
   maxHealth: combatant.max_health,
-  energy: 15,
-  maxEnergy: 20,
-  energyRate: 10, // rate at which energy charges
+  energy: 16,
+  maxEnergy: 30,
+  energyRate: 11, // rate at which energy charges
   attacks: {
     'adventurer-swing': attacks['adventurer-swing'],
     'adventurer-up-swing': attacks['adventurer-up-swing'],

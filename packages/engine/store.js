@@ -39,7 +39,7 @@ const initialState = {
       rooms: {},
     },
   },
-  players: {},
+  users: {},
 }
 
 const store = new Store({...initialState});

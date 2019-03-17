@@ -181,6 +181,7 @@ router.post('/auth/default', (req, res) => {
           RETURNING *
         )
         INSERT INTO combatants(id) SELECT id FROM u
+        RETURNING id
       `,
       [email, username, gender, hashedPassword, jwt_token],
       (err, results) => {
@@ -195,8 +196,18 @@ router.post('/auth/default', (req, res) => {
 
           callback({ status: 500, error: detail })
         } else {
-          callback(null);
+          callback(null, results.rows[0].id);
         }
+      });
+    },
+    (userid, callback) => {
+      pool.query(`
+        INSERT INTO user_inventory (user_id, item_id)
+        SELECT $1, 'heal-potion'
+        FROM generate_series(1, 2)
+      `, [userid], (err) => {
+        if (err) throw err;
+        callback(null);
       });
     },
     (callback) => {

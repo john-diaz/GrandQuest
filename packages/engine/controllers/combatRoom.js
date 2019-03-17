@@ -37,8 +37,7 @@ module.exports = (namespace) => (data = {}) => {
 
   // game loop
   setInterval(() => {
-    const state = store.getState();
-    const room = state.places.combat.rooms[initialState.id];
+    const room = store.getState().places.combat.rooms[initialState.id];
 
     // if there are players but game is not running then begin the first level
     if (!room.gameRunning) {
@@ -56,7 +55,80 @@ module.exports = (namespace) => (data = {}) => {
       const alive = _.filter(characters, c => c.entity.health > 0);
 
       if (alive.length && takenAction.length >= alive.length) {
-        advanceTurn(room.id);
+        const newRoom = advanceTurn(room.id);
+
+        const activeCharacters = newRoom.turn % 2
+          ? newRoom.enemies
+          : newRoom.players;
+
+        const newAlive = _.filter(activeCharacters, c => c.entity.health > 0);
+
+        // IF the characters that are supposed to act are all dead,
+        // then the level is over!
+        if (!newAlive.length) {
+          // create a record for the level
+          let levelRecord = createLevelRecord(newRoom.id);
+          newRoom.levelRecord[room.level] = levelRecord;
+          newRoom.playState = 0;
+
+          // reward players for completing the level
+          const levelCompletionReward = 3 + (newRoom.level * levelRecord.won ? 5 : 2);
+
+          levelRecord.players = _.mapObject(levelRecord.players, (playerRecord, playerId) => {
+            const user = state.users[playerId];
+            const newGold = user.gold + levelCompletionReward;
+
+            pool.query(`
+              UPDATE users SET gold = ${newGold}
+              WHERE id = ${playerId}
+            `, (err) => { if (err) throw err });
+
+            store.update('users', (users) => ({
+              ...users,
+              [user.id]: {
+                ...users[user.id],
+                gold: newGold,
+              }
+            }));
+
+            // update in level record
+            return {
+              ...playerRecord,
+              gold: playerRecord.gold + levelCompletionReward,
+            };
+          });
+
+          const values = `values ${_.map(newRoom.players, p => `(${p.id})`).join(', ')}`
+
+          pool.query(`
+          UPDATE combatants AS c SET
+            levels_played = levels_played + 1,
+            ${
+              levelRecord.won
+                ? 'levels_won = levels_won + 1'
+                : 'levels_lost = levels_lost + 1'
+            }
+          FROM (${values}) AS c2(id)
+          WHERE c2.id = c.id
+          RETURNING *
+          `, (err) => {
+            if (err) throw err;
+          });
+        } else if (newRoom.turn % 2) {
+          enemyTurn(newRoom);
+        }
+
+        // update store with new room
+        store.update('places', (places) => ({
+          ...places,
+          combat: {
+            ...places.combat,
+            rooms: {
+              ...places.combat.rooms,
+              [newRoom.id]: newRoom,
+            },
+          },
+        }));
       }
     } else if (Object.keys(room.readyToContinue).length === room.playerCount) {
       beginLevel(room, room.level + 1);
@@ -84,11 +156,11 @@ const beginLevel = (roomState, level) => {
     levelRecord: {},
     players: _.mapObject(roomState.players, p => ({
       ...p,
+      selectionStatus: 0,
       entity: {
         ...p.entity,
-        energy: p.entity.maxEnergy,
-      },
-      selectionStatus: 0,
+        energy: Math.ceil(p.entity.maxEnergy / 2),
+      }
     })),
     enemies: generateLevelEnemies(level),
     turn: 0,
@@ -125,8 +197,8 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: 1,
           defense: 1,
-          xp: 4,
-          gold: _.random(1, 3),
+          xpReward: 4,
+          goldReward: _.random(1, 3),
         }
       };
     }, {});
@@ -146,8 +218,8 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: 1,
           defense: 1,
-          xp: 4,
-          gold: _.random(1, 2),
+          xpReward: 4,
+          goldReward: _.random(3, 6),
         }
       };
     }, {});
@@ -167,8 +239,8 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: _.random(1, 3),
           defense: _.random(1, 3),
-          gold: _.random(3, 4),
-          xp: _.random(4, 6),
+          goldReward: _.random(5, 9),
+          xpReward: _.random(4, 6),
         },
       };
     }, {});
@@ -185,8 +257,8 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 3),
         defense: _.random(1, 3),
-        gold: _.random(1, 2),
-        xp: _.random(4, 6),
+        goldReward: _.random(5, 7),
+        xpReward: _.random(4, 6),
       },
       {
         id: uuid(),
@@ -197,8 +269,8 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 3),
         defense: _.random(1, 3),
-        gold: _.random(1, 2),
-        xp: _.random(4, 5),
+        goldReward: _.random(9, 12),
+        xpReward: _.random(4, 6),
       },
       {
         id: uuid(),
@@ -209,8 +281,8 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 3),
         defense: _.random(1, 3),
-        gold: _.random(1, 2),
-        xp: 4,
+        goldReward: _.random(9, 12),
+        xpReward: 4,
       },
       {
         id: uuid(),
@@ -221,8 +293,8 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 2),
         defense: _.random(1, 4),
-        gold: _.random(3, 5),
-        xp: _.random(5, 7),
+        goldReward: _.random(10, 16),
+        xpReward: _.random(5, 7),
       },
     ];
 
@@ -262,7 +334,7 @@ const generateLevelEnemies = (level) => {
     // random enemies
   }
 }
-const applyLevelOutcomes = (id) => {
+const createLevelRecord = (id) => {
   let roomState = store.getState().places.combat.rooms[id];
 
   const record = {
@@ -321,29 +393,12 @@ const applyLevelOutcomes = (id) => {
     });
   });
 
-  const values = `values ${_.map(roomState.players, p => `(${p.id})`).join(', ')}`
-
-  pool.query(`
-  UPDATE combatants AS c SET
-    levels_played = levels_played + 1,
-    ${
-      record.won
-        ? 'levels_won = levels_won + 1'
-        : 'levels_lost = levels_lost + 1'
-    }
-  FROM (${values}) AS c2(id)
-  WHERE c2.id = c.id
-  RETURNING *
-  `, (err) => {
-    if (err) throw err;
-    // console.log('saved level completion data to database');
-  });
-
   return record;
 }
 
 const advanceTurn = (id) => {
-  const roomState = store.getState().places.combat.rooms[id];
+  const state = store.getState();
+  const roomState = state.places.combat.rooms[id];
   let newRoom = {...roomState};
 
   // where we will store the turn events
@@ -374,13 +429,16 @@ const advanceTurn = (id) => {
       case 'attack':
         let chosenAttack = character.entity.attacks[action.id];
 
-        const baseDamage = ((character.level / 12) + 1) * (character.power / receiver.defense) * chosenAttack.stats.baseDamage;
-        // random number between 0 - 3
-        let multiplier = Math.floor(Math.random() * 3) + 1;
+        const baseDamage = (character.power / receiver.defense) * chosenAttack.stats.baseDamage;
+
+        // random number between 1 - 3
+        let multiplier = _.random(1, 3);
+
         // miss 12% of the time
         if (Math.random() < .12) {
           multiplier = 0;
         }
+
         // random number between 0.85 and 1
         const random = (Math.floor(Math.random() * (100 - 85 + 1)) + 85) / 100;
 
@@ -425,58 +483,58 @@ const advanceTurn = (id) => {
           // if the character is a player
           if (!character.enemy) {
             /* add xp and gold to outcome */
-            outcome.gold = receiver.gold;
-            outcome.xp = receiver.xp;
+            outcome.gold = receiver.goldReward;
+            outcome.xp = receiver.xpReward;
 
             /* save changes to player */
-            newRoom.players[character.id].gold = character.gold + outcome.gold;
+
+            const user = state.users[character.id];
+            if (!user) throw new Error('Could not find user in state.users with id' + character.id);
 
             let leveledUp = 0;
-
-            let newXp = character.xp + outcome.xp;
-            let newNextLevelXp = character.nextLevelXp;
+            let newXp = user.xp + outcome.xp;
+            let newNextLevelXp = user.nextLevelXp;
 
             // level up time!
-            if (newXp >= character.nextLevelXp) {
-              // console.log('level up!', newXp,'>=', character.nextLevelXp)
-              leveledUp = Math.floor(newXp / character.nextLevelXp);
-              newXp = character.xp % character.nextLevelXp;
-              newNextLevelXp = Math.floor(character.nextLevelXp * (9/5));
+            console.log(newXp, ' >= ', user.nextLevelXp);
+            if (newXp >= user.nextLevelXp) {
+              leveledUp = Math.floor(newXp / user.nextLevelXp);
+              newXp = newXp % user.nextLevelXp;
+              newNextLevelXp = Math.floor(user.nextLevelXp * (9/5));
             }
 
-            character = newRoom.players[character.id] = {
-              ...character,
-              level: character.level + leveledUp,
-              xp: newXp,
-              nextLevelXp: newNextLevelXp,
-            }
+            const newLevel = user.level + leveledUp;
+            const newGold = user.gold + outcome.gold;
 
-            pool.query(`
+            console.log(`
               UPDATE users SET
-                gold = ${character.gold},
-                level = ${character.level},
-                xp = ${character.xp},
-                next_level_xp = ${character.nextLevelXp}
+                gold = ${newGold},
+                level = ${newLevel},
+                xp = ${newXp},
+                next_level_xp = ${newNextLevelXp}
               WHERE id = ${character.id}
               RETURNING *
-            `, (err, results) => {
-              if (err) {
-                throw err;
-              }
+            `);
+            pool.query(`
+              UPDATE users SET
+                gold = ${newGold},
+                level = ${newLevel},
+                xp = ${newXp},
+                next_level_xp = ${newNextLevelXp}
+              WHERE id = ${character.id}
+              RETURNING *
+            `, (err, results) => { if (err) throw err });
 
-              const dbPlayer = results.rows[0];
-
-              store.update('players', (players) => ({
-                ...players,
-                [character.id]: {
-                  ...players[character.id],
-                  gold: Number(dbPlayer.gold),
-                  level: dbPlayer.level,
-                  xp: dbPlayer.xp,
-                  nextLevelXp: dbPlayer.next_level_xp,
-                },
-              }));
-            });
+            store.update('users', (users) => ({
+              ...users,
+              [character.id]: {
+                ...users[character.id],
+                gold: newGold,
+                level: newLevel,
+                xp: newXp,
+                nextLevelXp: newNextLevelXp,
+              },
+            }));
           }
         }
 
@@ -500,8 +558,6 @@ const advanceTurn = (id) => {
             `, (err) => {
               if (err) {
                 throw err;
-              } else {
-                console.log('set health in DB to ', receiver.entity.health);
               }
             });
           }
@@ -564,33 +620,10 @@ const advanceTurn = (id) => {
     }
   }));
 
-  const alive = _.filter(newRoom[nextCategory], c => c.entity.health > 0);
-  if (!alive.length) {// this level is over! record everything!
-    let levelRecord = applyLevelOutcomes(newRoom.id);
-    newRoom.levelRecord[roomState.level] = levelRecord;
-    newRoom.playState = 0;
-  }
-
   newRoom.queuedEvents = [];
   newRoom.turn++;
 
-
-  // save changes done
-  store.update('places', (places) => ({
-    ...places,
-    combat: {
-      ...places.combat,
-      rooms: {
-        ...places.combat.rooms,
-        [roomState.id]: newRoom,
-      }
-    }
-  }));
-
-  // it's time for enemies to attack AND there are enemies alive
-  if (alive.length && newRoom.turn % 2) {
-    enemyTurn(newRoom);
-  }
+  return newRoom;
 }
 
 const enemyTurn = (roomState) => {
@@ -609,45 +642,26 @@ const enemyTurn = (roomState) => {
     if (!roomState.gameRunning) return;
     // very simple AI strategy for the Slime entity
     let event = null;
-    /*
-      Heal IF...
-      1. 50% of maxHealth is gone
-      2. There is a potion available in inventory
-      3. There is a 15% chance probability (random)
-    */
-    let healthDelta = enemy.entity.maxHealth - enemy.entity.health;
 
-    if (healthDelta >= (enemy.entity.maxHealth * 0.5) && Math.random() <= 0.15 && enemy.inventory['heal-potion']) {
+    let ids = _.filter(roomState.players, player => player.entity.health > 0).map(p => p.id);
+    let playerId = ids[Math.floor(Math.random() * ids.length)];
+
+    // choose an attack that requires less energy than that of the current enemy entity.energy
+    const attack = _.findKey(enemy.entity.attacks, (atk) => atk.stats.energy <= enemy.entity.energy);
+
+    if (playerId && attack) {
       event = {
-        characterId: enemy.id,
-        receiverId: enemy.id,
-        action: {
-          type: 'potion',
-          id: 'heal-potion',
+        character: {
+          id: enemy.id,
+          enemy: true,
         },
-      }
-    } else {
-      let ids = _.filter(roomState.players, player => player.entity.health > 0).map(p => p.id);
-      let playerId = ids[Math.floor(Math.random() * ids.length)];
-
-      // choose an attack that requires less energy than that of the current enemy entity.energy
-      const { attacks } = enemy.entity;
-      const attack = _.findKey(attacks, (atk) => atk.stats.energy <= enemy.entity.energy);
-
-      if (playerId && attack) {
-        event = {
-          character: {
-            id: enemy.id,
-            enemy: true,
-          },
-          receiver: {
-            id: playerId,
-            enemy: false
-          },
-          action: {
-            type: 'attack',
-            id: attack,
-          }
+        receiver: {
+          id: playerId,
+          enemy: false
+        },
+        action: {
+          type: 'attack',
+          id: attack,
         }
       }
     }

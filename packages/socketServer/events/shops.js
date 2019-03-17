@@ -7,18 +7,18 @@ const availableShops = {
 	'potions-shop': {
 		location: 'monokai-village',
 		items: {
-			'heal-potion': 11,
+			'heal-potion': 8,
 		},
 		actions: {
-			'heal': (player) => new Promise((resolve, reject) => {
-				pool.query(`SELECT * FROM combatants WHERE id = ${player.id}`, (err, results) => {
+			'heal': (user) => new Promise((resolve, reject) => {
+				pool.query(`SELECT * FROM combatants WHERE id = ${user.id}`, (err, results) => {
 					if (err) {
-						return reject('Failed to heal player. Please try again later!');
+						return reject('Failed to heal user. Please try again later!');
 					}
 
 					const combatant = results.rows[0];
 
-					const gold = player.gold;
+					const gold = user.gold;
 					const health = combatant.health;
 					const maxHealth = combatant.max_health;
 
@@ -38,23 +38,24 @@ const availableShops = {
 					} else {
 						let added = Math.min(health + affordableHP, maxHealth) - health;
 						let cost = Number((added / goldToHealthUnit).toFixed(1));
+						const newGold = Math.ceil(gold - cost);
 
 						pool.query(`
 							WITH u AS (
 			          UPDATE users
-			          SET gold = gold - ${cost}
-			          WHERE id = ${player.id}
+			          SET gold = ${newGold}
+			          WHERE id = ${user.id}
 			          RETURNING id
 			        )
 			        UPDATE combatants
 			        SET health = health + ${added}
-			        WHERE id = ${player.id}
+			        WHERE id = ${user.id}
 						`).then((results) => {
-							store.update('players', (players) => ({
-								...players,
-								[player.id]: {
-									...player,
-									gold: gold - cost,
+							store.update('users', (users) => ({
+								...users,
+								[user.id]: {
+									...user,
+									gold: newGold,
 								}
 							}));
 							resolve({
@@ -78,8 +79,8 @@ module.exports = (namespace) => (socket) => {
 			if (typeof cb === 'function') cb('An invalid transaction was provided.');
 			return;
 		}
-		const player = store.getState().players[socket.userID];
-		if (!socket.userID || !player) {
+		const user = store.getState().users[socket.userID];
+		if (!socket.userID || !user) {
 			if (typeof cb === 'function') cb('You don\'t appear to be authenticated.');
 			return;	
 		}
@@ -91,7 +92,7 @@ module.exports = (namespace) => (socket) => {
 		}
 
 		/*
-			if chosenShop.location !== player.location
+			if chosenShop.location !== user.location
 				return
 		*/
 
@@ -113,12 +114,12 @@ module.exports = (namespace) => (socket) => {
 
 			const itemPrice = chosenShop.items[item];
 
-			if (player.gold < itemPrice) {
+			if (user.gold < itemPrice) {
 				if (typeof cb === 'function') cb('It looks like you don\'t have enough money for that item.');
 				return;
 			}
 
-			const newGold = Math.max(player.gold - itemPrice, 0);
+			const newGold = Math.max(user.gold - itemPrice, 0);
 			pool.query(`
 				INSERT INTO user_inventory (
 					user_id,
@@ -126,16 +127,16 @@ module.exports = (namespace) => (socket) => {
 				) VALUES (
 					$1, $2
 				);
-			`, [player.id, item], err => {
+			`, [user.id, item], err => {
 				if (err) throw err;
 			});
 			pool.query(`UPDATE users SET gold = ${newGold}`, (err) => {
 				if (err) throw err;
 			});
-			store.update('players', (players) => ({
-				...players,
-				[player.id]: {
-					...player,
+			store.update('users', (users) => ({
+				...users,
+				[user.id]: {
+					...user,
 					gold: newGold,
 				}
 			}));
@@ -147,7 +148,7 @@ module.exports = (namespace) => (socket) => {
 				return;
 			}
 
-			chosenShop.actions[action](player)
+			chosenShop.actions[action](user)
 			.then((results) => {
 				if (typeof cb === 'function') {
 					cb(null, results);

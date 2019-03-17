@@ -39,7 +39,7 @@ module.exports = (namespace) => {
   // emit room data for each combat room
   setInterval(() => {
     _.forEach(store.getState().places.combat.rooms, (room) => {
-      // emit room state to players connected to the room
+      // emit room state to users connected to the room
       namespace.to(room.id).emit('COMBAT_ROOM_STATE', room);
     });
   }, (500));

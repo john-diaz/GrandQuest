@@ -4,7 +4,7 @@ const pool = require('../../services/psql/pool');
 
 const router = new express.Router();
 
-router.get('/player/:id/combat', (req, res) => {
+router.get('/combatant/:id', (req, res) => {
   // if (redis.getKey(`combatant-${id}`));
 
   pool.query('SELECT * FROM combatants WHERE id = $1', [req.params.id], (err, results) => {

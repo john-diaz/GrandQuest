@@ -43,43 +43,46 @@ namespace.on('connect', (socket) => {
         return;
       }
 
-      let player = {
-        id: results.rows[0].id,
-        username: results.rows[0].username,
-        gender: results.rows[0].gender,
-        isAdmin: results.rows[0].is_admin,
-        createdAt: results.rows[0].created_at,
-        // IMPORTANT: gold has to be turned into a Number because node-psql parses decimals as strings (https://github.com/brianc/node-postgres/issues/811)
-        gold: Number(results.rows[0].gold),
-        level: results.rows[0].level,
-        xp: results.rows[0].xp,
-        nextLevelXp: results.rows[0].next_level_xp,
-      };
+      const dbUser = results.rows[0];
 
       let state = store.getState();
-      if (state.players[player.id]) {
-        if (typeof cb === 'function') cb('Player is already online')
+
+      if (state.users[dbUser.id]) {
+        if (typeof cb === 'function') cb('User is already online')
         return;
       }
 
-      console.log('connected as ', player.username);
+      let user = {
+        id: dbUser.id,
+        username: dbUser.username,
+        gender: dbUser.gender,
+        isAdmin: dbUser.is_admin,
+        createdAt: dbUser.created_at,
+        // IMPORTANT: gold has to be turned into a Number because node-psql parses decimals as strings (https://github.com/brianc/node-postgres/issues/811)
+        gold: Number(dbUser.gold),
+        level: dbUser.level,
+        xp: dbUser.xp,
+        nextLevelXp: dbUser.next_level_xp,
+      };
 
-      store.update('players', (players) => ({
-        ...players,
-        [player.id]: player,
+      console.log('connected as ', user.username);
+
+      store.update('users', (users) => ({
+        ...users,
+        [user.id]: user,
       }));
 
-      socket.userID = player.id;
+      socket.userID = user.id;
 
-      if (typeof cb === 'function') cb(null, player)
+      if (typeof cb === 'function') cb(null, user)
     });
   });
   // socket disconnection
   socket.on('disconnect', () => {
     if (socket.userID) {
-      const player = store.getState().players[socket.userID];
+      const user = store.getState().users[socket.userID];
 
-      store.update('players', (players) => _.omit(players, player.id));
+      store.update('users', (users) => _.omit(users, user.id));
     }
 
     console.log('disconnected ', socket.id);

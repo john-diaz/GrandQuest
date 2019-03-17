@@ -40,13 +40,13 @@ module.exports = (namespace) => {
       ut = Date.now()
     }
     /*
-      Emit player states to sockets
+      Emit user states to sockets
     */
     if (now - pt > 500) {
       _.forEach(namespace.sockets, socket => {
         if (socket.userID) {
-          let player = state.players[socket.userID];
-          socket.emit('PLAYER_STATE', player)
+          let user = state.users[socket.userID];
+          socket.emit('USER_STATE', user)
         }
       });
       pt = Date.now();

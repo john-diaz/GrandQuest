@@ -81,7 +81,7 @@ module.exports = () => (socket) => {
    }
 
     const state = store.getState();
-    const player = state.players[socket.userID];
+    const user = state.users[socket.userID];
 
     // find the requested room
     const rooms = state.places.combat.rooms;
@@ -114,7 +114,7 @@ module.exports = () => (socket) => {
     {
       if (typeof cb === 'function') cb('You are already in this room');
     } 
-    else // Add the player
+    else // Add the user
     {
       // get the combatant
       pool.query(`
@@ -122,7 +122,7 @@ module.exports = () => (socket) => {
       WHERE id = ${socket.userID}
       `, (err, results) => {
         if (err || !results.rowCount) {
-          if (typeof cb === 'function') cb('Failed to load player data. Please try again later.');
+          if (typeof cb === 'function') cb('Failed to load user data. Please try again later.');
         } else {
           const combatant = results.rows[0];
 
@@ -137,7 +137,7 @@ module.exports = () => (socket) => {
           WHERE user_id = ${socket.userID}
           `, (err, results) => {
             if (err) {
-              if (typeof cb === 'function') cb('Failed to load player data. Please try again later.');
+              if (typeof cb === 'function') cb('Failed to load user data. Please try again later.');
               return;
             }
 
@@ -168,15 +168,13 @@ module.exports = () => (socket) => {
                 ...room.players,
                 [socket.userID]: {
                   id: socket.userID,
-                  username: player.username,
-                  gold: player.gold,
-                  xp: player.xp,
-                  nextLevelXp: player.nextLevelXp,
+                  username: user.username,
                   enemy: false,
-                  level: player.level,
+                  goldReward: 0,
+                  xpReward: 0,
                   power: combatant.power,
                   defense: combatant.defense,
-                  entity: Entity.Adventurer(combatant), // set this to the role the player is doing
+                  entity: Entity.Adventurer(combatant), // set this to the role the user is doing
                   selectionStatus: room.turn % 2 == 0 ? 0 : -1,
                   inventory,
                 },
@@ -213,12 +211,12 @@ module.exports = () => (socket) => {
 
   /**
    * Combat room selection event -
-   * This is fired when the player has chosen an
+   * This is fired when the user has chosen an
    * event like attack or potion
-   * @param {Object} event - The selected event dispatched by the player
+   * @param {Object} event - The selected event dispatched by the user
    * @param {string} event.receiverId - ID of the character being exposed to the chosen event
-   * @param {Object} event.action - The selected action dispatched by the player
-   * @param {string} event.action.type - Describes the type of action the player wants to take
+   * @param {Object} event.action - The selected action dispatched by the user
+   * @param {string} event.action.type - Describes the type of action the user wants to take
    * @param {string} event.action.id - The ID of the sgelected action
    */
   socket.on('COMBAT_ROOM_ACTION', (event) => {
@@ -237,7 +235,7 @@ module.exports = () => (socket) => {
       return; // room not currently playing
     }
     /*
-      Verify player is in room
+      Verify user is in room
     */
     if (!room.players.hasOwnProperty(socket.userID)) {
       return; // player is not in the room
@@ -339,6 +337,7 @@ module.exports = () => (socket) => {
         },
       },
     };
+
 
     /*
       Save changes made to room
