@@ -11,7 +11,20 @@ router.get('/combatant/:id', (req, res) => {
     if (err || !results.rowCount) {
       res.status(404).json({ message: 'Could not find combat data' });
     } else {
-      res.json({ data: results.rows[0] });
+    	const combatant = results.rows[0];
+
+      res.json({
+      	data: {
+	      	health: combatant.health,
+	      	maxHealth: combatant.max_health,
+	      	levelsPlayed: combatant.levels_played,
+	      	levelsWon: combatant.levels_won,
+	      	levelsLost: combatant.levels_lost,
+	      	maxLevel: combatant.max_level,
+	      	power: combatant.power,
+	      	defense: combatant.defense,
+	      }
+      });
     }
   });
 });
