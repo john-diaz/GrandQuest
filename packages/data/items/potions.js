@@ -7,6 +7,12 @@ module.exports = {
 		description: 'Recovers 25 health points',
 		type: 'potion',
 	},
+	'heal-potion-2': {
+		id: 'heal-potion-2',
+		name: 'Heal II',
+		description: 'Recovers 50 health points',
+		type: 'potion',
+	},
 	'thorns-potion': {
 		id: 'thorns-potion',
 		name: 'Thorns',

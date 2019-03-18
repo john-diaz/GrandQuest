@@ -10,6 +10,7 @@ const availableShops = {
 		location: 'monokai-village',
 		items: {
 			'heal-potion': 8,
+			'heal-potion-2': 24,
 		},
 		actions: {
 			'heal': (user) => new Promise((resolve, reject) => {
