@@ -72,7 +72,8 @@ module.exports = (namespace) => (data = {}) => {
           newRoom.playState = 0;
 
           // reward players for completing the level
-          const levelCompletionReward = 3 + (newRoom.level * levelRecord.won ? 5 : 2);
+          // also prevents player from going broke
+          const levelCompletionReward = 5 + (newRoom.level * levelRecord.won ? 5 : 2);
 
           levelRecord.players = _.mapObject(levelRecord.players, (playerRecord, playerId) => {
             const user = state.users[playerId];
@@ -198,14 +199,14 @@ const generateLevelEnemies = (level) => {
           power: 1,
           defense: 1,
           xpReward: 4,
-          goldReward: _.random(1, 3),
+          goldReward: _.random(4, 8),
         }
       };
     }, {});
   }
   // 3-4 slimes
   else if (level <= 2) {
-    return _.reduce([3, Math.floor(Math.random() * 4 + 3)], (m) => {
+    return _.reduce([2, _.random(3, 4)], (m) => {
       const id = uuid();
       return {
         ...m,
@@ -219,7 +220,7 @@ const generateLevelEnemies = (level) => {
           power: 1,
           defense: 1,
           xpReward: 4,
-          goldReward: _.random(3, 6),
+          goldReward: _.random(5, 9),
         }
       };
     }, {});
@@ -239,7 +240,7 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: _.random(1, 3),
           defense: _.random(1, 3),
-          goldReward: _.random(5, 9),
+          goldReward: _.random(7, 12),
           xpReward: _.random(4, 6),
         },
       };
@@ -257,7 +258,7 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 3),
         defense: _.random(1, 3),
-        goldReward: _.random(5, 7),
+        goldReward: _.random(9, 12),
         xpReward: _.random(4, 6),
       },
       {
@@ -293,8 +294,8 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 2),
         defense: _.random(1, 4),
-        goldReward: _.random(10, 16),
-        xpReward: _.random(5, 7),
+        goldReward: _.random(10, 18),
+        xpReward: _.random(7, 8),
       },
     ];
 
