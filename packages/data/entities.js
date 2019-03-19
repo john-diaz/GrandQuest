@@ -16,9 +16,10 @@ module.exports.Slime = () => ({
 
 module.exports.MountainWarrior = () => ({
   name: 'mountain-warrior',
-  health: 70,
-  maxHealth: 70,
+  health: 50,
+  maxHealth: 50,
   energy: 5,
+  maxEnergy: 10,
   energyRate: 5,
   attacks: {
     'mountain-warrior-slash': attacks['mountain-warrior-slash']

@@ -199,14 +199,14 @@ const generateLevelEnemies = (level) => {
           power: 1,
           defense: 1,
           xpReward: 4,
-          goldReward: _.random(4, 8),
+          goldReward: _.random(5, 10),
         }
       };
     }, {});
   }
-  // 3-4 slimes
+  // 3 slimes
   else if (level <= 2) {
-    return _.reduce([2, _.random(3, 4)], (m) => {
+    return _.reduce([2, 3, 4], (m) => {
       const id = uuid();
       return {
         ...m,
@@ -220,7 +220,7 @@ const generateLevelEnemies = (level) => {
           power: 1,
           defense: 1,
           xpReward: 4,
-          goldReward: _.random(5, 9),
+          goldReward: _.random(6, 11),
         }
       };
     }, {});
@@ -240,7 +240,7 @@ const generateLevelEnemies = (level) => {
           selectionStatus: -1,
           power: _.random(1, 3),
           defense: _.random(1, 3),
-          goldReward: _.random(7, 12),
+          goldReward: _.random(11, 16),
           xpReward: _.random(4, 6),
         },
       };
@@ -258,7 +258,7 @@ const generateLevelEnemies = (level) => {
         selectionStatus: -1,
         power: _.random(1, 3),
         defense: _.random(1, 3),
-        goldReward: _.random(9, 12),
+        goldReward: _.random(12, 16),
         xpReward: _.random(4, 6),
       },
       {
@@ -289,7 +289,7 @@ const generateLevelEnemies = (level) => {
         id: uuid(),
         level: _.random(2, 3),
         enemy: true,
-        username: 'Monokai Warrior',
+        username: 'Warrior',
         entity: Entity.MountainWarrior(),
         selectionStatus: -1,
         power: _.random(1, 2),
@@ -304,29 +304,82 @@ const generateLevelEnemies = (level) => {
       [c.id]: c
     }), {});
   }
+  // 2 mountain warriors
   else if (level <= 7) {
-    // slimes and mountain warrior
+    return _.reduce([1, 2], (m) => {
+      const id = uuid();
+      return {
+        ...m,
+        [id]: {
+          id,
+          level: _.random(2, 4),
+          enemy: true,
+          username: 'Warrior',
+          entity: Entity.MountainWarrior(),
+          selectionStatus: -1,
+          power: _.random(2, 2),
+          defense: _.random(2, 4),
+          goldReward: _.random(12, 24),
+          xpReward: _.random(10, 15),
+        },
+      };
+    }, {});
   }
+  // 4 mountain warriors
   else if (level <= 10) {
-    // mountain warriors
+    return _.reduce([1, 2, 3, 4], (m) => {
+      const id = uuid();
+      return {
+        ...m,
+        [id]: {
+          id,
+          level: _.random(2, 4),
+          enemy: true,
+          username: 'Warrior',
+          entity: Entity.MountainWarrior(),
+          selectionStatus: -1,
+          power: _.random(2, 2),
+          defense: _.random(2, 4),
+          goldReward: _.random(12, 24),
+          xpReward: _.random(10, 15),
+        },
+      };
+    }, {});
   }
   else if (level <= 15) {
-    // 3 mountain warriors, 1 mutants
+    return _.reduce([1, 2, 3, 4], (m) => {
+      const id = uuid();
+      return {
+        ...m,
+        [id]: {
+          id,
+          level: _.random(2, 4),
+          enemy: true,
+          username: 'Warrior',
+          entity: Entity.MountainWarrior(),
+          selectionStatus: -1,
+          power: _.random(2, 2),
+          defense: _.random(2, 4),
+          goldReward: _.random(12, 24),
+          xpReward: _.random(10, 15),
+        },
+      };
+    }, {});
   }
   else if (level <= 16) {
-    // 2 mountain warrios, 2 mutants
+    // 1 mountain warrios, 1 mutants
   }
   else if (level <= 18) {
-    // mountain warriors / mutants
+    // 2 mountain warriors / 2 mutants
   }
   else if (level <= 20) {
-    // mutants
+    // 4 mutants
   }
   else if (level <= 25) {
-    // mutants and golems
+    // 2 mutants and 1 golem
   }
   else if (level < 30) {
-    // golems
+    // 4 golems
   }
   else if (level === 30) {
     // BOSS
@@ -569,6 +622,27 @@ const advanceTurn = (id) => {
               heal: 25,
             },
           });
+        } else if (chosenItem.id === 'heal-potion-2') {
+          receiver.entity.health = Math.min(receiver.entity.health + 50, receiver.entity.maxHealth);
+
+          if (!receiver.enemy) {
+            pool.query(`
+              UPDATE combatants SET
+                health = ${receiver.entity.health}
+              WHERE id = ${receiver.id}
+            `, (err) => {
+              if (err) {
+                throw err;
+              }
+            });
+          }
+
+          newRoom.turnEvents[newRoom.turn].push({
+            ...event,
+            outcome: {
+              heal: 50,
+            },
+          });
         } else {
           return console.error('Unknow potion id ', action.id);
         }
@@ -637,6 +711,8 @@ const enemyTurn = (roomState) => {
     Zombies bunch up on low health players and never heal
   */
 
+  console.log('enemy turn!');
+
   _.forEach(_.filter(roomState.enemies, e => e.entity.health > 0), enemy => setTimeout(() => {
     state = store.getState();
     roomState = state.places.combat.rooms[roomState.id];
@@ -650,6 +726,8 @@ const enemyTurn = (roomState) => {
     // choose an attack that requires less energy than that of the current enemy entity.energy
     const attack = _.findKey(enemy.entity.attacks, (atk) => atk.stats.energy <= enemy.entity.energy);
 
+    console.log('attack', attack);
+    console.log('energy = ', enemy.entity.energy);
     if (playerId && attack) {
       event = {
         character: {
@@ -683,6 +761,6 @@ const enemyTurn = (roomState) => {
         }
       },
     }));
-    // console.log('enemy done');
+    console.log('enemy done', event);
   }, _.random(100, 2000)));
 }
