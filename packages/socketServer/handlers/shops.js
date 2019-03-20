@@ -1,4 +1,4 @@
-/* ./packages/socketServer/events/shops.js */
+/* ./packages/socketServer/handlers/shops.js */
 
 const store = require('../../engine/store');
 const pool = require('../../services/psql/pool');
@@ -182,7 +182,7 @@ const availableShops = {
 	}
 }
 
-module.exports = (namespace) => (socket) => {
+module.exports = (socket) => {
 	socket.on('SHOP_TRANSACTION', (transaction, cb) => {
 		// type checking
 		if (!transaction || typeof transaction !== 'object') {

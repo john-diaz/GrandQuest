@@ -9,12 +9,12 @@ const io = module.exports = require('socket.io')();
 
 let namespace = io.of('/game');
 
-// initialize socket events
-let combatHubEvents = require('./events/combat/hub')(namespace);
-let combatRoomEvents = require('./events/combat/rooms')();
-let shopEvents = require('./events/shops')(namespace);
+// initialize socket handlers
+let combatHubHandlers = require('./handlers/combat/hub');
+let combatRoomHandlers = require('./handlers/combat/rooms');
+let shopHandlers = require('./handlers/shops');
 
-let worldController = require('../engine/controllers/world')(namespace);
+let worldController = require('../engine/controllers/world');
 
 /*
   Namespace connection event
@@ -23,9 +23,9 @@ namespace.on('connect', (socket) => {
   /*
     Socket events
   */
-  combatHubEvents(socket);
-  combatRoomEvents(socket);
-  shopEvents(socket);
+  combatHubHandlers(socket);
+  combatRoomHandlers(socket);
+  shopHandlers(socket);
 
   socket.on('AUTHENTICATE_SOCKET', (token, cb) => {
     if (typeof token !== 'string' || token.trim().length < 10) {
@@ -37,6 +37,8 @@ namespace.on('connect', (socket) => {
       return cb('Socket already has authentication');
     }
 
+    let state = store.getState();
+
     pool.query('SELECT * FROM users WHERE token = $1', [token], (err, results) => {
       if (err || !results.rowCount) {
         if (typeof cb === 'function') cb('Could not find any users with this token');
@@ -46,35 +48,37 @@ namespace.on('connect', (socket) => {
       const dbUser = results.rows[0];
 
       let state = store.getState();
+      let user;
 
       if (state.users[dbUser.id]) {
-        if (typeof cb === 'function') cb('User is already online')
-        return;
+        user = state.users[dbUser.id];
+      } else {
+        user = {
+          id: dbUser.id,
+          username: dbUser.username,
+          gender: dbUser.gender,
+          isAdmin: dbUser.is_admin,
+          createdAt: dbUser.created_at,
+          // IMPORTANT: gold has to be turned into a Number because node-psql parses decimals as strings (https://github.com/brianc/node-postgres/issues/811)
+          gold: Number(dbUser.gold),
+          level: dbUser.level,
+          xp: dbUser.xp,
+          nextLevelXp: dbUser.next_level_xp,
+        };
+
+        console.log(`AUTH: added ${user.username} to state`);
+
+        store.update('users', (users) => ({
+          ...users,
+          [user.id]: user,
+        }));
       }
 
-      let user = {
-        id: dbUser.id,
-        username: dbUser.username,
-        gender: dbUser.gender,
-        isAdmin: dbUser.is_admin,
-        createdAt: dbUser.created_at,
-        // IMPORTANT: gold has to be turned into a Number because node-psql parses decimals as strings (https://github.com/brianc/node-postgres/issues/811)
-        gold: Number(dbUser.gold),
-        level: dbUser.level,
-        xp: dbUser.xp,
-        nextLevelXp: dbUser.next_level_xp,
-      };
-
-      console.log('connected as ', user.username);
-
-      store.update('users', (users) => ({
-        ...users,
-        [user.id]: user,
-      }));
+      console.log(`AUTH: ${socket.id} authenticated as `, user.username);
 
       socket.userID = user.id;
 
-      if (typeof cb === 'function') cb(null, user)
+      if (typeof cb === 'function') cb(null, user);
     });
   });
   // socket disconnection

@@ -11,7 +11,7 @@ const Entity = require('../../data/entities');
   Export room creator function
   Will return a new roomState object
 */
-module.exports = (namespace) => (data = {}) => {
+module.exports = (data = {}) => {
   // Generate state
   const initialState = {
     // default data

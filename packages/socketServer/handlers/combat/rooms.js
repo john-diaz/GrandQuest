@@ -52,7 +52,7 @@ const removePlayerFromRoom = (socket, done) => {
   if (typeof cb === 'function') cb(null);
 }
 
-module.exports = () => (socket) => {
+module.exports = (socket) => {
   /*
     Sockt combat room events
   */
