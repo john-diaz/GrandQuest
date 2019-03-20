@@ -36,7 +36,7 @@ const gameTick = () => {
       world: {
         ...places.world,
         timeOfDay: (delta * gameUnitToSeconds) + now,
-        connections: Object.keys(namespace.connected).length,
+        connections: Object.keys(state.users).length,
       },
     }));
 
