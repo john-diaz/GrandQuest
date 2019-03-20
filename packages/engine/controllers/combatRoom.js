@@ -77,6 +77,11 @@ module.exports = (namespace) => (data = {}) => {
 
           levelRecord.players = _.mapObject(levelRecord.players, (playerRecord, playerId) => {
             const user = state.users[playerId];
+
+            if (!user) {
+              return;
+            }
+
             const newGold = user.gold + levelCompletionReward;
 
             pool.query(`
