@@ -20,18 +20,22 @@ const removePlayerFromRoom = (socket, done) => {
     return cb('There are no combat rooms matching this id');
   }
 
-  const gamePlayer = room.players[socket.userID];
-  if (!gamePlayer) {
-    return cb('You don\'t appear to be in his room');
-  }
+  const user = state.users[socket.userID];
 
   delete room.players[socket.userID];
   room.playerCount = Object.keys(room.players).length;
 
   if (!room.playerCount) {
-    console.log('Combat game - OFF')
+    console.log('Combat game - OFF');
     room.gameRunning = false;
   }
+
+  /* REMOVE Mutex Lock */
+  store.update('users', (users) => ({
+    ...users,
+    [user.id]: _.omit(user, 'socketLock')
+  }));
+  console.log('remove socketLock from ', user.username);
 
   // save combat room changes
   store.update('places', (places) => ({
@@ -72,16 +76,17 @@ module.exports = (socket) => {
       if (typeof cb === 'function') cb('You don\'t appear to be authenticated to the server.');
       return;
     }
-    /*
-      Check if socket is connected to a room already
-    */
-   if (socket.roomID) {
-     if (typeof cb === 'function') cb('You\'re already connected to a room');
-     return;
-   }
 
     const state = store.getState();
     const user = state.users[socket.userID];
+
+    /*
+      Check for mutex lock
+    */
+    if (user.socketLock) {
+      if (typeof cb === 'function') cb('Mutex error: Make sure you are not already playing in another tab when joining a combat room.');
+      return;
+    }
 
     // find the requested room
     const rooms = state.places.combat.rooms;
@@ -141,6 +146,7 @@ module.exports = (socket) => {
               return;
             }
 
+            // parse user inventory
             const inventory = _.reduce(results.rows, (memo, row) => {
               if (!memo[row.item_id]) {
                 const selectedItem = items[row.item_id];
@@ -181,7 +187,7 @@ module.exports = (socket) => {
               },
             };
   
-            // update file
+            // update combat room
             store.update('places', (places) => ({
               ...places,
               combat: {
@@ -194,6 +200,15 @@ module.exports = (socket) => {
               },
             }));
   
+            /* SET Mutex Lock */
+            store.update('users', (users) => ({
+              ...users,
+              [user.id]: {
+                ...user,
+                socketLock: socket.id,
+              }
+            }));
+
             socket.roomID = room.id;
             socket.join(room.id);
   
@@ -223,9 +238,10 @@ module.exports = (socket) => {
     /*
       Check for socket authentication
     */
-    if (!socket.userID || !socket.roomID) {
+    if (!socket.roomID) {
       return;
     }
+
     /*
       Load room state
     */
@@ -361,7 +377,7 @@ module.exports = (socket) => {
     /*
       Check for socket authentication
     */
-    if (!socket.userID || !socket.roomID) {
+    if (!socket.roomID) {
       return;
     }
     const state = store.getState();
@@ -403,7 +419,7 @@ module.exports = (socket) => {
   });
   socket.on('disconnect', () => {
     console.log('combat room force disconnection ', socket.roomID);
-    if (socket.userID && socket.roomID) {
+    if (socket.roomID) {
       removePlayerFromRoom(socket);
     }
   });

@@ -4,7 +4,7 @@ const _ = require('underscore');
 const store = require('../../../../packages/engine/store');
 
 const io = require('../../index.js');
-const namespace = io.of('combat_hub');
+const namespace = io.of('/game');
 
 /*
   Will emit combat hub state to sockets 

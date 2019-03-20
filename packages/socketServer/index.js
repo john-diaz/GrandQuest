@@ -86,7 +86,12 @@ namespace.on('connect', (socket) => {
     if (socket.userID) {
       const user = store.getState().users[socket.userID];
 
-      store.update('users', (users) => _.omit(users, user.id));
+      const authenticatedSockets = _.filter(io.sockets, socket => socket.userID === user.id);
+
+      console.log('DISCONNECTED, here are the remaining authenticated sockets: ');
+      console.log(Object.keys(authenticatedSockets));
+
+      // store.update('users', (users) => _.omit(users, user.id));
     }
 
     console.log('disconnected ', socket.id);
