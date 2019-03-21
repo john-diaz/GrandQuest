@@ -24,7 +24,7 @@ let wt = Date.now();
 const gameTick = () => {
   const now = Date.now();
   const delta = now - worldTimeStart;
-  const gameUnitToSeconds = 60 * 60;
+  const gameUnitToSeconds = 60;
   const state = store.getState();
 
   /*
