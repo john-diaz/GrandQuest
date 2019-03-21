@@ -195,6 +195,12 @@ module.exports = (socket) => {
 			return;	
 		}
 
+		/* Check Mutex Lock */
+		if (user.socketLock) {
+			if (typeof cb === 'function') cb('Mutex error: Please make sure you are not in game in another tab when making transactions.');
+			return;
+		}
+
 		const chosenShop = availableShops[transaction.shop];
 		if (!chosenShop) {
 			if (typeof cb === 'function') cb('Invalid shop provided. Please try again later.');
