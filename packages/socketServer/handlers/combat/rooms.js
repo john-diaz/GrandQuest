@@ -101,6 +101,11 @@ module.exports = (socket) => {
       return;
     }
 
+    if (room.playState === 0) {
+      if (typeof cb === 'function') cb('This room is currently in between levels.');
+      return;
+    }
+
     if (room.playerCount === room.maxPlayers) {
       if (typeof cb === 'function') cb('This room has been filled up to the max. Please try again later.');
       return;
