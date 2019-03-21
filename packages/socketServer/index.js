@@ -83,17 +83,17 @@ namespace.on('connect', (socket) => {
   });
   // socket disconnection
   socket.on('disconnect', () => {
+    console.log('disconnected ', socket.id);
     if (socket.userID) {
       const user = store.getState().users[socket.userID];
 
-      const authenticatedSockets = _.filter(io.sockets, socket => socket.userID === user.id);
+      // find any other sockets authenticated to this user
+      const authenticatedSockets = _.filter(namespace.sockets, socket => socket.userID === user.id);
 
-      console.log('DISCONNECTED, here are the remaining authenticated sockets: ');
-      console.log(Object.keys(authenticatedSockets));
-
-      // store.update('users', (users) => _.omit(users, user.id));
+      if (!authenticatedSockets.length) {
+        store.update('users', (users) => _.omit(users, user.id));
+        console.log('Remove user', user.id, 'from state');
+      }
     }
-
-    console.log('disconnected ', socket.id);
   });
 });
