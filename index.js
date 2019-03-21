@@ -27,6 +27,9 @@ const httpServer = createServer(expressApp);
 // socket server listen with the http server
 socketServer.listen(httpServer);
 
+// Initialize Discord Bot
+require('./packages/services/discord');
+
 console.log('$ SERVER - NODE_ENV =', process.env.NODE_ENV);
 console.log('$ SERVER - DB =', process.env.DB_NAME);
 

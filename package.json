@@ -31,6 +31,7 @@
     "aws-sdk": "^2.371.0",
     "bcrypt": "^3.0.2",
     "cors": "^2.8.5",
+    "discord.js": "^11.4.2",
     "dotenv": "^6.1.0",
     "engine.io": "^3.3.2",
     "express": "^4.16.4",
