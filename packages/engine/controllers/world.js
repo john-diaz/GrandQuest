@@ -14,6 +14,7 @@ store.update('places', (places) => ({
   world: {
     ...places.world,
     timeOfDay: worldTimeStart,
+    connectedUsers: {},
   }
 }));
 
@@ -36,7 +37,7 @@ const gameTick = () => {
       world: {
         ...places.world,
         timeOfDay: (delta * gameUnitToSeconds) + now,
-        connections: Object.keys(state.users).length,
+        connectedUsers: _.mapObject(state.users, ({ id, username, gold, createdAt }) => ({ id, username, gold, createdAt })),
       },
     }));
 

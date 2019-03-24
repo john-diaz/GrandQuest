@@ -26,7 +26,6 @@ const removePlayerFromRoom = (socket, done) => {
   room.playerCount = Object.keys(room.players).length;
 
   if (!room.playerCount) {
-    console.log('Combat game - OFF');
     room.gameRunning = false;
   }
 
@@ -35,7 +34,6 @@ const removePlayerFromRoom = (socket, done) => {
     ...users,
     [user.id]: _.omit(user, 'socketLock')
   }));
-  console.log('remove socketLock from ', user.username);
 
   // save combat room changes
   store.update('places', (places) => ({
@@ -218,7 +216,6 @@ module.exports = (socket) => {
             socket.join(room.id);
   
             // OK!
-            console.log(`! SOCKET connected to combat room. id(${room.id})`);
             if (typeof cb === 'function') {
               // callback no error and send combat room
               cb(null, store.getState().places.combat.rooms[newRoom.id])
@@ -423,7 +420,6 @@ module.exports = (socket) => {
     removePlayerFromRoom(socket, cb);
   });
   socket.on('disconnect', () => {
-    console.log('combat room force disconnection ', socket.roomID);
     if (socket.roomID) {
       removePlayerFromRoom(socket);
     }

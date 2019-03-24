@@ -46,13 +46,11 @@ setInterval(() => {
 
 module.exports = (socket) => {
   socket.on('COMBAT_HUB_CONNECT', (cb) => {
-    console.log('! SOCKET connected to combat hub');
     socket.join('combat_hub');
     if (typeof cb === 'function') cb(null);
   });
 
   socket.on('COMBAT_HUB_DISCONNECT', (cb) => {
-    console.log('! SOCKET disconnected from combat hub');
     socket.leave('combat_hub');
     if (typeof cb === 'function') cb(null);
   });

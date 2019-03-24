@@ -555,7 +555,6 @@ const advanceTurn = (id) => {
             let newNextLevelXp = user.nextLevelXp;
 
             // level up time!
-            console.log(newXp, ' >= ', user.nextLevelXp);
             if (newXp >= user.nextLevelXp) {
               leveledUp = Math.floor(newXp / user.nextLevelXp);
               newXp = newXp % user.nextLevelXp;
@@ -565,15 +564,6 @@ const advanceTurn = (id) => {
             const newLevel = user.level + leveledUp;
             const newGold = user.gold + outcome.gold;
 
-            console.log(`
-              UPDATE users SET
-                gold = ${newGold},
-                level = ${newLevel},
-                xp = ${newXp},
-                next_level_xp = ${newNextLevelXp}
-              WHERE id = ${character.id}
-              RETURNING *
-            `);
             pool.query(`
               UPDATE users SET
                 gold = ${newGold},
@@ -707,17 +697,6 @@ const advanceTurn = (id) => {
 }
 
 const enemyTurn = (roomState) => {
-  /*
-    Ideally each entity should have their own strategy for attacking and using potions
-
-    Example:  
-    Slimes choose random players to attack and only heal when they feel lucky
-    Mages choose to attack the player that last attacked them, using potions and spells. They can heal when at low health
-    Zombies bunch up on low health players and never heal
-  */
-
-  console.log('enemy turn!');
-
   _.forEach(_.filter(roomState.enemies, e => e.entity.health > 0), enemy => setTimeout(() => {
     state = store.getState();
     roomState = state.places.combat.rooms[roomState.id];
@@ -731,8 +710,6 @@ const enemyTurn = (roomState) => {
     // choose an attack that requires less energy than that of the current enemy entity.energy
     const attack = _.findKey(enemy.entity.attacks, (atk) => atk.stats.energy <= enemy.entity.energy);
 
-    console.log('attack', attack);
-    console.log('energy = ', enemy.entity.energy);
     if (playerId && attack) {
       event = {
         character: {
@@ -766,6 +743,5 @@ const enemyTurn = (roomState) => {
         }
       },
     }));
-    console.log('enemy done', event);
   }, _.random(100, 2000)));
 }
