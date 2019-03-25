@@ -29,13 +29,21 @@ const removePlayerFromRoom = (socket, done) => {
     room.gameRunning = false;
     room.playState = 1;
   }
+  // remove any queued events for the player
+  room.queuedEvents = _.filter(room.queuedEvents, (e) => {
+    return e.character.id !== user.id
+  });
 
   /* REMOVE Mutex Lock */
   store.update('users', (users) => ({
     ...users,
-    [user.id]: _.omit(user, 'socketLock')
+    [user.id]: {
+      ...user,
+      socketLock: null,
+    }
   }));
 
+  
   // save combat room changes
   store.update('places', (places) => ({
     ...places,

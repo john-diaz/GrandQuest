@@ -64,6 +64,7 @@ namespace.on('connect', (socket) => {
           level: dbUser.level,
           xp: dbUser.xp,
           nextLevelXp: dbUser.next_level_xp,
+          socketLock: null,
         };
 
         console.log(`AUTH: added ${user.username} to state`);
