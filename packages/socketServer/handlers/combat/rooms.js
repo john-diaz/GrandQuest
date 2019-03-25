@@ -27,6 +27,7 @@ const removePlayerFromRoom = (socket, done) => {
 
   if (!room.playerCount) {
     room.gameRunning = false;
+    room.playState = 1;
   }
 
   /* REMOVE Mutex Lock */
