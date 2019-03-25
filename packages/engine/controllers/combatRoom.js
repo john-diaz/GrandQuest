@@ -351,7 +351,7 @@ const generateLevelEnemies = (level) => {
       };
     }, {});
   }
-  else if (level <= 15) {
+  else /* if (level <= 15) */ {
     return _.reduce([1, 2, 3, 4], (m) => {
       const id = uuid();
       return {
@@ -371,7 +371,7 @@ const generateLevelEnemies = (level) => {
       };
     }, {});
   }
-  else if (level <= 16) {
+  /*else if (level <= 16) {
     // 1 mountain warrios, 1 mutants
   }
   else if (level <= 18) {
@@ -391,7 +391,7 @@ const generateLevelEnemies = (level) => {
   }
   else {
     // random enemies
-  }
+  }*/
 }
 const createLevelRecord = (id) => {
   let roomState = store.getState().places.combat.rooms[id];
