@@ -8,6 +8,7 @@ const devLogRoutes = require('./routes/devlog');
 const forumRoutes = require('./routes/forum');
 const authRoutes = require('./routes/auth');
 const playerRoutes = require('./routes/player');
+const leaderboardRoutes = require('./routes/leaderboards');
 
 /*
   Configure app
@@ -31,6 +32,7 @@ app.use(devLogRoutes);
 app.use(forumRoutes);
 app.use(authRoutes);
 app.use(playerRoutes);
+app.use(leaderboardRoutes);
 
 /*
   404 route
