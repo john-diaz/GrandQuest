@@ -246,7 +246,7 @@ module.exports = (socket) => {
 			`, [user.id, item], err => {
 				if (err) throw err;
 			});
-			pool.query(`UPDATE users SET gold = ${newGold}`, (err) => {
+			pool.query(`UPDATE users SET gold = ${newGold} WHERE id = ${user.id}`, (err) => {
 				if (err) throw err;
 			});
 			store.update('users', (users) => ({
