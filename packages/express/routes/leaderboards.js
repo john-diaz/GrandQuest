@@ -21,7 +21,7 @@ router.get('/leaderboards/combat', (req, res) => {
   	SELECT users.id, username, max_level, levels_won, levels_lost FROM users
   	INNER JOIN combatants
   	ON users.id = combatants.id
-  	ORDER BY max_level, levels_won DESC
+  	ORDER BY max_level DESC, levels_won DESC
   	LIMIT 25
   `)
   .then((results) => {
