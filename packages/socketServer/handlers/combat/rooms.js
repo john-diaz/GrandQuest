@@ -195,6 +195,7 @@ module.exports = (socket) => {
                   entity: Entity.Adventurer(combatant), // set this to the role the user is doing
                   selectionStatus: room.turn % 2 == 0 ? 0 : -1,
                   inventory,
+                  maxLevel: combatant.max_level,
                 },
               },
             };

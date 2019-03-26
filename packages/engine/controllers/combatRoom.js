@@ -104,17 +104,18 @@ module.exports = (data = {}) => {
             };
           });
 
-          const values = `values ${_.map(newRoom.players, p => `(${p.id})`).join(', ')}`
+          const values = _.map(newRoom.players, p => `(${p.id}, ${Math.max(room.level, p.maxLevel)})`).join(', ');
 
           pool.query(`
           UPDATE combatants AS c SET
             levels_played = levels_played + 1,
+            max_level = new_max_level,
             ${
               levelRecord.won
                 ? 'levels_won = levels_won + 1'
                 : 'levels_lost = levels_lost + 1'
             }
-          FROM (${values}) AS c2(id)
+          FROM (values ${values}) AS c2(id, new_max_level)
           WHERE c2.id = c.id
           RETURNING *
           `, (err) => {
