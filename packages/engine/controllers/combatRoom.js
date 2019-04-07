@@ -104,22 +104,21 @@ module.exports = (data = {}) => {
             };
           });
 
-          const values = _.map(newRoom.players, p => `(${p.id}, ${Math.max(room.level, p.maxLevel)})`).join(', ');
 
-          pool.query(`
-          UPDATE combatants AS c SET
-            levels_played = levels_played + 1,
-            max_level = new_max_level,
-            ${
-              levelRecord.won
-                ? 'levels_won = levels_won + 1'
-                : 'levels_lost = levels_lost + 1'
-            }
-          FROM (values ${values}) AS c2(id, new_max_level)
-          WHERE c2.id = c.id
-          RETURNING *
-          `, (err) => {
-            if (err) throw err;
+          _.each(newRoom.players, p => {
+            pool.query(`
+            UPDATE combatants SET
+              levels_played = levels_played + 1,
+              ${
+                levelRecord.won
+                  ? 'levels_won = levels_won + 1,'
+                  : 'levels_lost = levels_lost + 1,'
+              }
+              max_level = ${Math.max(room.level, p.maxLevel)}
+            WHERE id = ${p.id}
+            `, (err) => {
+              if (err) throw err;
+            });
           });
         } else if (newRoom.turn % 2) {
           enemyTurn(newRoom);
