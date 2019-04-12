@@ -76,7 +76,7 @@ module.exports = (data = {}) => {
           const levelCompletionReward = 5 + (newRoom.level * levelRecord.won ? 5 : 2);
 
           levelRecord.players = _.mapObject(levelRecord.players, (playerRecord, playerId) => {
-            const user = room.users[playerId];
+            const user = room.players[playerId];
 
             if (!user) {
               return;
