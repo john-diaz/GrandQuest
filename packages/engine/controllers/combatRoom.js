@@ -117,7 +117,11 @@ module.exports = (data = {}) => {
               max_level = ${Math.max(room.level, p.maxLevel)}
             WHERE id = ${p.id}
             `, (err) => {
-              if (err) throw err;
+              if (err) {
+                console.warn(`
+                  GOT THAT SAME ERROR!!!!
+                `, err);
+              };
             });
           });
         } else if (newRoom.turn % 2) {
