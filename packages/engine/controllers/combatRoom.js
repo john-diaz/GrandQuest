@@ -37,7 +37,8 @@ module.exports = (data = {}) => {
 
   // game loop
   setInterval(() => {
-    const room = store.getState().places.combat.rooms[initialState.id];
+    const state = store.getState();
+    const room = state.places.combat.rooms[initialState.id];
 
     // if there are players but game is not running then begin the first level
     if (!room.gameRunning) {
@@ -76,13 +77,14 @@ module.exports = (data = {}) => {
           const levelCompletionReward = 5 + (newRoom.level * levelRecord.won ? 5 : 2);
 
           levelRecord.players = _.mapObject(levelRecord.players, (playerRecord, playerId) => {
-            const user = room.players[playerId];
+            const user = state.users[playerId];
 
             if (!user) {
               return;
             }
 
             const newGold = user.gold + levelCompletionReward;
+            console.log(`> NEW GOLD = ${user.gold} + ${levelCompletionReward}`);
 
             pool.query(`
               UPDATE users SET gold = ${newGold}
