@@ -89,7 +89,11 @@ module.exports = (data = {}) => {
             pool.query(`
               UPDATE users SET gold = ${newGold}
               WHERE id = ${playerId}
-            `, (err) => { if (err) throw err });
+            `, (err) => {
+              if (err) {
+                console.log('WHOOPS!', err);
+              }
+            });
 
             store.update('users', (users) => ({
               ...users,
