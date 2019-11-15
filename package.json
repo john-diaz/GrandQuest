@@ -17,11 +17,14 @@
   "bugs": {
     "url": "https://github.com/SKEPDIMI/GrandQuest/issues"
   },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint . --ext .js --fix"
+  },
   "homepage": "https://github.com/SKEPDIMI/GrandQuest#readme",
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
-    "eslint": "^5.9.0",
+    "eslint": "^5.16.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.10.0",
     "nodemon": "^1.18.7"
