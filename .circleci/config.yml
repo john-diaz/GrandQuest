@@ -46,12 +46,9 @@ jobs:
     working_directory: ~/repo
 
     -steps
-    commands:
-      linting:
-        steps:
-          - git fetch origin master
-          - FILES_CHANGED=$(git diff --name-only origin/master | grep '.js*$' || true)
-          - npm run lint $FILES_CHANGED --unsafe-perm --quiet
+      - run: git fetch origin master
+      - run: FILES_CHANGED=$(git diff --name-only origin/master | grep '.js*$' || true)
+      - run: npm run lint $FILES_CHANGED --unsafe-perm --quiet
 
 workflows:
   version: 2
