@@ -26,7 +26,7 @@
     "chai-http": "^4.2.0",
     "eslint": "^5.16.0",
     "mocha": "^5.2.0",
-    "node-sass": "^4.10.0",
+    "node-sass": "^4.13.1",
     "nodemon": "^1.18.7"
   },
   "dependencies": {
