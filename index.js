@@ -1,4 +1,5 @@
 /* index.js */
+require("./packages/sentry");
 
 /*
   Import dependencies
