@@ -33,7 +33,7 @@
     "@sentry/node": "^6.11.0",
     "@sentry/tracing": "^6.11.0",
     "async": "^2.6.1",
-    "aws-sdk": "^2.371.0",
+    "aws-sdk": "^2.814.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "discord.js": "^11.4.2",
